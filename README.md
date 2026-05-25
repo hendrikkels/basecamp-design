@@ -7,11 +7,11 @@ Direction C — **Block / Retro**. Cool gray base, JetBrains Mono + Arial Black,
 ```
 basecamp/
 ├── index.html               ← hub / overview
-├── Design System.html       ← full component library (22 sections)
-├── Marketing Landing.html   ← public front door
-├── App Shell.html           ← three-column notes editor
-├── Dashboard.html           ← KPI tiles + activity + widget shelf
-├── Design Directions.html   ← archive — original A/B/C exploration
+├── design_system.html       ← full component library (22 sections)
+├── marketing_landing.html   ← public front door
+├── app_shell.html           ← three-column notes editor
+├── dashboard.html           ← KPI tiles + activity + widget shelf
+├── design_directions.html   ← archive — original A/B/C exploration
 │
 ├── tokens.css               ← color, type, spacing, grain, theme switching
 ├── components.css           ← every primitive (buttons, inputs, cards…)
