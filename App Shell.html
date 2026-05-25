@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>basecamp — the room</title>
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="components.css" />
+<style>
+  html, body { height: 100%; overflow: hidden; }
+  body { display: flex; flex-direction: column; }
+
+  /* TOP STRIP — slimmer for app */
+  .app-top {
+    background: var(--bg);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    border-bottom: 1px solid var(--hairline);
+    flex: 0 0 auto;
+    z-index: var(--z-nav);
+  }
+  .app-top-inner {
+    display: grid;
+    grid-template-columns: 220px 260px 1fr;
+    align-items: center;
+    height: 48px;
+  }
+  .app-brand-cell {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 16px;
+    height: 100%;
+    border-right: 1px solid var(--hairline);
+  }
+  .app-brand-cell .brand small { color: var(--dim); }
+  .app-quick {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 16px;
+    height: 100%;
+    border-right: 1px solid var(--hairline);
+  }
+  .app-quick .input-wrap { flex: 1; }
+  .app-quick .input-wrap .input { height: 28px; background: var(--surface-2); font-size: 12px; padding-left: 30px; }
+  .app-quick .input-wrap .icon-l { left: 10px; }
+  .app-top-actions {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 16px;
+    justify-content: flex-end;
+    height: 100%;
+  }
+  .app-top-actions .crumbs { margin-right: auto; }
+
+  /* APP BODY */
+  .app-body {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: 220px 280px 1fr;
+    min-height: 0;
+  }
+
+  /* SIDEBAR */
+  .app-sidebar {
+    background: var(--surface-0);
+    padding: 18px 12px;
+    display: flex; flex-direction: column; gap: 4px;
+    overflow-y: auto;
+    position: relative;
+  }
+  .app-sidebar::after {
+    content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 1px;
+    background: var(--hairline);
+  }
+  .app-sidebar .group {
+    display: flex; flex-direction: column; gap: 2px;
+    margin-top: 18px;
+  }
+  .app-sidebar .group-lbl {
+    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--dim);
+    padding: 4px 10px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .app-sidebar .group-lbl .add { color: var(--dim); cursor: pointer; }
+  .app-sidebar .group-lbl .add:hover { color: var(--acc); }
+  .app-sidebar .item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 10px;
+    font-size: 12px;
+    color: var(--muted);
+    border-radius: var(--r-xs);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background var(--dur-fast), color var(--dur-fast);
+    position: relative;
+  }
+  .app-sidebar .item:hover { background: var(--surface-1); color: var(--text); }
+  .app-sidebar .item.active { background: var(--surface-2); color: var(--text); }
+  .app-sidebar .item.active::before { content: '▰'; color: var(--acc); margin-right: -2px; font-size: 9px; line-height: 1; }
+  .app-sidebar .item .count { margin-left: auto; color: var(--dim); font-size: 10px; font-feature-settings: "tnum"; }
+  .app-sidebar .item.active .count { color: var(--text); }
+  .app-sidebar .item .ico { width: 14px; text-align: center; color: var(--dim); font-family: var(--mono); font-size: 13px; flex-shrink: 0;}
+  .app-sidebar .item.active .ico { color: var(--text); }
+
+  .app-sidebar .user-card {
+    margin-top: auto;
+    background: var(--surface-1);
+    padding: 10px 12px;
+    border-radius: var(--r-xs);
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer;
+  }
+  .app-sidebar .user-card .name { font-size: 12px; color: var(--text); line-height: 1.2;}
+  .app-sidebar .user-card .meta { font-size: 10px; color: var(--dim); letter-spacing: 0.06em; }
+
+  /* NOTES LIST */
+  .notes-col {
+    background: var(--bg);
+    overflow-y: auto;
+    position: relative;
+    border-right: 1px solid var(--hairline);
+  }
+  .notes-head {
+    position: sticky; top: 0;
+    background: color-mix(in oklab, var(--bg) 90%, transparent);
+    backdrop-filter: blur(10px);
+    padding: 16px 16px 10px;
+    z-index: 1;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .notes-head .row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .notes-head .ttl {
+    font-family: var(--display); font-size: 22px; letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .notes-head .ttl .count { color: var(--dim); font-size: 11px; font-family: var(--mono); letter-spacing: 0.08em; margin-left: 6px; vertical-align: 4px;}
+  .notes-head .filter-row { display: flex; align-items: center; gap: 8px; font-size: 10px; color: var(--dim); letter-spacing: 0.12em; text-transform: uppercase;}
+  .notes-head .toggle-group { transform: scale(0.92); transform-origin: left center; }
+  .note {
+    display: block; padding: 14px 16px;
+    border-bottom: 1px solid var(--hairline);
+    text-decoration: none;
+    color: var(--text);
+    cursor: pointer;
+    transition: background var(--dur-fast);
+    position: relative;
+  }
+  .note:hover { background: var(--surface-1); }
+  .note.active {
+    background: var(--surface-2);
+  }
+  .note.active::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+    background: var(--acc);
+  }
+  .note .meta-row {
+    display: flex; gap: 8px; align-items: center;
+    font-size: 10px; letter-spacing: 0.08em; color: var(--dim);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .note .meta-row .tag { color: var(--acc); }
+  .note .meta-row .date { margin-left: auto; }
+  .note .ttl {
+    font-family: var(--display); font-size: 16px;
+    letter-spacing: -0.01em; line-height: 1.15;
+    margin: 0 0 4px;
+  }
+  .note .excerpt {
+    font-size: 11px; color: var(--muted); line-height: 1.5;
+    overflow: hidden; text-overflow: ellipsis;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  }
+  .note .badges { display: flex; gap: 6px; margin-top: 8px; }
+  .note .pin {
+    position: absolute; top: 12px; right: 14px;
+    color: var(--acc-2); font-size: 10px;
+  }
+
+  /* EDITOR */
+  .editor-col {
+    background: var(--bg);
+    overflow-y: auto;
+    display: flex; flex-direction: column;
+  }
+  .editor-head {
+    position: sticky; top: 0;
+    background: color-mix(in oklab, var(--bg) 92%, transparent);
+    backdrop-filter: blur(10px);
+    padding: 14px 32px;
+    z-index: 1;
+    border-bottom: 1px solid var(--hairline);
+    display: flex; align-items: center; gap: 16px;
+  }
+  .editor-head .crumbs { font-size: 11px; }
+  .editor-head .right { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+
+  .editor-body {
+    padding: 56px max(64px, 8vw) 96px;
+    max-width: 920px;
+    margin: 0 auto;
+    width: 100%;
+    flex: 1;
+  }
+  .editor-body .doc-meta {
+    display: flex; gap: 16px; align-items: center;
+    font-size: 10px; letter-spacing: 0.16em; color: var(--dim);
+    text-transform: uppercase; margin-bottom: 24px;
+  }
+  .editor-body .doc-meta .acc { color: var(--acc); }
+  .editor-body h1 {
+    font-family: var(--display); font-size: 56px;
+    letter-spacing: -0.025em; line-height: 0.95;
+    margin: 0 0 16px;
+    color: var(--text);
+    outline: 0;
+  }
+  .editor-body .lede {
+    font-size: 16px; color: var(--muted); line-height: 1.7;
+    max-width: 60ch; margin: 0 0 32px;
+    border-bottom: 1px solid var(--hairline);
+    padding-bottom: 24px;
+  }
+  .editor-body .doc-body {
+    font-size: 14px; line-height: 1.75; color: var(--text); max-width: 64ch;
+  }
+  .editor-body .doc-body p { margin: 0 0 18px; }
+  .editor-body .doc-body h2 {
+    font-family: var(--display); font-size: 28px;
+    letter-spacing: -0.02em; margin: 40px 0 14px;
+  }
+  .editor-body .doc-body blockquote {
+    margin: 24px 0 24px;
+    padding: 0 0 0 18px;
+    border-left: 2px solid var(--acc);
+    font-family: var(--display); font-size: 22px;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+    color: var(--text);
+  }
+  .editor-body .doc-body code {
+    background: var(--surface-2); padding: 1px 6px;
+    border-radius: 2px; font-size: 12px; color: var(--text);
+  }
+  .editor-body .doc-body .acc { color: var(--acc); }
+
+  .doc-body .marker {
+    font-family: var(--mono);
+    color: var(--acc); letter-spacing: -0.05em; font-size: 18px;
+    margin-right: 8px;
+  }
+  .doc-body .marker.empty { color: var(--surface-3); }
+
+  /* Slash command popover inline */
+  .slash-pop {
+    position: absolute;
+    background: var(--surface-1);
+    padding: 6px;
+    border-radius: var(--r-sm);
+    box-shadow: 0 0 0 1px var(--hairline), 0 12px 32px rgba(0,0,0,0.45);
+    min-width: 240px;
+    z-index: 5;
+    margin-top: 4px;
+  }
+  .slash-pop .item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 10px;
+    border-radius: var(--r-xs);
+    font-size: 12px;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .slash-pop .item:hover, .slash-pop .item.hl { background: var(--surface-2); }
+  .slash-pop .item.hl .ico { color: var(--acc); }
+  .slash-pop .item .ico { width: 14px; color: var(--dim); font-family: var(--mono); }
+  .slash-pop .item .ks { margin-left: auto; font-size: 10px; color: var(--dim); }
+  .slash-pop .grp-lbl {
+    font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--dim);
+    padding: 8px 10px 4px;
+  }
+
+  /* Cursor */
+  .cursor { display: inline-block; width: 2px; height: 1em; background: var(--acc); vertical-align: -2px; animation: blink 1s steps(2, end) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* Saving indicator */
+  .save-state { display: flex; align-items: center; gap: 6px; color: var(--dim); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;}
+  .save-state .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); }
+
+  @media (max-width: 1100px) {
+    .app-body { grid-template-columns: 200px 1fr; }
+    .notes-col { display: none; }
+    .app-top-inner { grid-template-columns: 200px 1fr; }
+    .app-quick { display: none; }
+  }
+  @media (max-width: 720px) {
+    .app-body { grid-template-columns: 1fr; }
+    .app-sidebar { display: none; }
+    .app-top-inner { grid-template-columns: 1fr; }
+    .app-brand-cell { border-right: 0; }
+  }
+</style>
+</head>
+<body data-screen-label="App Shell — Notes">
+
+<!-- ===== TOP STRIP ===== -->
+<header class="app-top">
+  <div class="app-top-inner">
+    <div class="app-brand-cell">
+      <a class="brand" href="index.html"><span class="block"></span>basecamp <small>v0.1</small></a>
+    </div>
+    <div class="app-quick">
+      <div class="input-wrap">
+        <span class="icon-l">▸</span>
+        <input class="input" placeholder="grep notes / posts / files…" />
+      </div>
+      <span class="kbd">⌘K</span>
+    </div>
+    <div class="app-top-actions">
+      <div class="crumbs">
+        <a href="#">Room</a>
+        <span class="sep">/</span>
+        <a href="#">Notes</a>
+        <span class="sep">/</span>
+        <a href="#">Essays</a>
+        <span class="sep">/</span>
+        <span class="here">The discipline of things</span>
+      </div>
+      <button class="btn btn-icon btn-sm btn-ghost" title="History">⟲</button>
+      <button class="btn btn-icon btn-sm btn-ghost" title="Inspector">▣</button>
+      <button class="theme-toggle" onclick="toggleTheme()">
+        <span class="sq"></span><span id="theme-label">DARK</span>
+      </button>
+      <button class="btn btn-primary btn-sm">▸ PUBLISH<span class="ks">⌘↵</span></button>
+    </div>
+  </div>
+</header>
+
+<!-- ===== BODY ===== -->
+<div class="app-body">
+
+  <!-- SIDEBAR -->
+  <aside class="app-sidebar" data-screen-label="Sidebar">
+    <div class="group" style="margin-top: 0;">
+      <div class="group-lbl">▰▰ ROOM</div>
+      <a class="item"><span class="ico">▸</span>Dashboard</a>
+      <a class="item active"><span class="ico">◇</span>Posts<span class="count">47</span></a>
+      <a class="item"><span class="ico">◆</span>Notes<span class="count">214</span></a>
+      <a class="item"><span class="ico">▣</span>Widgets<span class="count">9</span></a>
+      <a class="item"><span class="ico">★</span>Pinned<span class="count">4</span></a>
+    </div>
+
+    <div class="group">
+      <div class="group-lbl">░▒ TAGS<span class="add">+</span></div>
+      <a class="item"><span class="ico" style="color: var(--acc);">#</span>essay<span class="count">28</span></a>
+      <a class="item"><span class="ico" style="color: var(--acc);">#</span>process<span class="count">14</span></a>
+      <a class="item"><span class="ico" style="color: var(--acc);">#</span>type<span class="count">9</span></a>
+      <a class="item"><span class="ico" style="color: var(--acc);">#</span>code<span class="count">12</span></a>
+      <a class="item"><span class="ico" style="color: var(--acc);">#</span>misc<span class="count">7</span></a>
+    </div>
+
+    <div class="group">
+      <div class="group-lbl">▓█ INBOX</div>
+      <a class="item"><span class="ico">↗</span>Drafts<span class="count">3</span></a>
+      <a class="item"><span class="ico">⏱</span>Scheduled<span class="count">1</span></a>
+      <a class="item"><span class="ico">🗑</span>Trash</a>
+    </div>
+
+    <div class="user-card">
+      <span class="avatar">HV</span>
+      <div>
+        <div class="name">Hendrik</div>
+        <div class="meta">▰ ONLINE · NY</div>
+      </div>
+      <span style="margin-left: auto; color: var(--dim);">▾</span>
+    </div>
+  </aside>
+
+  <!-- NOTES LIST -->
+  <section class="notes-col" data-screen-label="Notes List">
+    <header class="notes-head">
+      <div class="row">
+        <div class="ttl">Posts<span class="count">47</span></div>
+        <button class="btn btn-sm btn-primary">+ NEW</button>
+      </div>
+      <div class="filter-row">
+        <div class="toggle-group">
+          <button class="on">ALL</button>
+          <button>LIVE</button>
+          <button>DRAFT</button>
+        </div>
+        <span style="margin-left: auto;">SORT · MODIFIED ↓</span>
+      </div>
+    </header>
+
+    <a class="note active">
+      <span class="pin">★</span>
+      <div class="meta-row"><span class="tag">#essay</span><span class="date">MAY 24</span></div>
+      <h3 class="ttl">The discipline of things.</h3>
+      <p class="excerpt">// On building tools you actually use. A short essay about restraint, deadlines, and walking away from the half-built.</p>
+      <div class="badges"><span class="badge acc">LIVE</span><span class="badge outline">8 MIN</span></div>
+    </a>
+
+    <a class="note">
+      <div class="meta-row"><span class="tag">#type</span><span class="date">MAY 18</span></div>
+      <h3 class="ttl">On block characters.</h3>
+      <p class="excerpt">Why ▰▱░▒▓█ keep showing up in good UI — what restraint looks like at the glyph level.</p>
+      <div class="badges"><span class="badge acc">LIVE</span><span class="badge outline">5 MIN</span></div>
+    </a>
+
+    <a class="note">
+      <span class="pin">★</span>
+      <div class="meta-row"><span class="tag">#process</span><span class="date">MAY 11</span></div>
+      <h3 class="ttl">How I shipped basecamp.</h3>
+      <p class="excerpt">A build log. The stack, the deadlines I missed, the parts I&rsquo;m still ashamed of.</p>
+      <div class="badges"><span class="badge acc">LIVE</span><span class="badge outline">14 MIN</span></div>
+    </a>
+
+    <a class="note">
+      <div class="meta-row"><span class="tag">#essay</span><span class="date">MAY 04</span></div>
+      <h3 class="ttl">A widget is a promise.</h3>
+      <p class="excerpt">Building 9 of them in two months taught me what they&rsquo;re actually for. (Spoiler: not delight.)</p>
+      <div class="badges"><span class="badge acc">LIVE</span><span class="badge outline">6 MIN</span></div>
+    </a>
+
+    <a class="note">
+      <div class="meta-row"><span class="tag">#type</span><span class="date">APR 28</span></div>
+      <h3 class="ttl">Notes on type.</h3>
+      <p class="excerpt">JetBrains Mono, Arial Black, and what happens when you only let yourself use two faces.</p>
+      <div class="badges"><span class="badge">DRAFT</span><span class="badge outline">4 MIN</span></div>
+    </a>
+
+    <a class="note">
+      <div class="meta-row"><span class="tag">#code</span><span class="date">APR 22</span></div>
+      <h3 class="ttl">Deploy a static site, slowly.</h3>
+      <p class="excerpt">CDN-first, no build server, no Docker. The boring stack is the one you ship with.</p>
+      <div class="badges"><span class="badge warn">SCHEDULED</span><span class="badge outline">7 MIN</span></div>
+    </a>
+
+    <a class="note">
+      <div class="meta-row"><span class="tag">#misc</span><span class="date">APR 15</span></div>
+      <h3 class="ttl">Reading list — Q2 2026.</h3>
+      <p class="excerpt">Christopher Alexander, John Berger, and a re-read of Stewart Brand. Notes on each as I go.</p>
+      <div class="badges"><span class="badge">DRAFT</span></div>
+    </a>
+
+    <a class="note">
+      <div class="meta-row"><span class="tag">#process</span><span class="date">APR 09</span></div>
+      <h3 class="ttl">On working slowly.</h3>
+      <p class="excerpt">Why basecamp took 4 months instead of 4 weeks, and why I&rsquo;d do it again.</p>
+      <div class="badges"><span class="badge acc">LIVE</span><span class="badge outline">9 MIN</span></div>
+    </a>
+  </section>
+
+  <!-- EDITOR -->
+  <section class="editor-col" data-screen-label="Editor">
+    <header class="editor-head">
+      <span class="badge acc-soft">▰ ESSAY · 0042</span>
+      <span class="save-state"><span class="dot"></span>AUTOSAVED · 12s ago</span>
+      <div class="right">
+        <span class="user-pill" style="padding: 3px 12px 3px 3px; font-size: 11px;">
+          <span class="avatar sm">HV</span>HV
+        </span>
+        <button class="btn btn-sm btn-ghost">⟲ HISTORY</button>
+        <button class="btn btn-sm btn-secondary">PREVIEW</button>
+      </div>
+    </header>
+
+    <div class="editor-body">
+      <div class="doc-meta">
+        <span class="acc">▰ 0042</span>
+        <span>MAY 24, 2026 · NEW YORK</span>
+        <span>· EST. 8 MIN READ</span>
+        <span style="margin-left: auto;"><span class="acc">#</span>essay <span style="margin-left: 8px;"><span class="acc">#</span>process</span></span>
+      </div>
+
+      <h1 contenteditable="true" spellcheck="false">The discipline of things.</h1>
+
+      <p class="lede" contenteditable="true" spellcheck="false">
+        A short essay about why I keep building small tools — and why I keep walking away from them
+        before they grow up. The half-built is a place to live in, not just leave.
+      </p>
+
+      <div class="doc-body" contenteditable="true" spellcheck="false">
+        <p><span class="marker">▰▰</span>Every tool I build starts as a half-thought. A note in a textfile, a sketch in a notebook,
+          a feature I wish another app had. I let it sit for a week. Sometimes a month. If it&rsquo;s still bothering me,
+          I open a new project.</p>
+
+        <p>Most don&rsquo;t survive contact with a deadline. <span class="acc">basecamp</span> nearly didn&rsquo;t — three weeks in
+          I was tempted to scrap the dashboard and turn it into a static site. I&rsquo;m glad I waited.</p>
+
+        <h2>1. The boring stack</h2>
+
+        <p><span class="marker">▱▱</span>The room runs on the smallest pile of tools I could find. Plain HTML, plain CSS, a tiny
+          JS runtime for the widgets. No build server, no Docker, no dependency I haven&rsquo;t personally
+          read the source of. <code>vite build</code> and rsync to a CDN. That&rsquo;s it.</p>
+
+        <p>The boring stack is the one you ship with. It&rsquo;s also the one you maintain six months later
+          without flinching, which is the whole point.</p>
+
+        <blockquote>If you can&rsquo;t maintain it on a Sunday afternoon, you don&rsquo;t own it.</blockquote>
+
+        <h2>2. Restraint, by design</h2>
+
+        <p><span class="marker">░░</span>One accent color. Two fonts. Five sizes of type and five sizes of space. I held
+          myself to this for the whole build, and the design got better every time I bumped into a wall.</p>
+
+        <p>Constraints aren&rsquo;t a posture. They&rsquo;re a discipline that protects future you from current you.</p>
+
+        <p style="position: relative;">
+          The cursor goes here<span class="cursor"></span>
+        </p>
+
+        <!-- Slash command popover (showcase) -->
+        <div style="position: relative; height: 240px;">
+          <div class="slash-pop" style="left: 0; top: 8px;">
+            <div class="grp-lbl">▰ BLOCKS</div>
+            <div class="item hl"><span class="ico">▸</span>Heading 2<span class="ks">/h2</span></div>
+            <div class="item"><span class="ico">▣</span>Block quote<span class="ks">/q</span></div>
+            <div class="item"><span class="ico">◆</span>Callout<span class="ks">/!</span></div>
+            <div class="item"><span class="ico">█</span>Code block<span class="ks">```</span></div>
+            <div class="item"><span class="ico">━</span>Divider<span class="ks">---</span></div>
+            <div class="grp-lbl">EMBED</div>
+            <div class="item"><span class="ico">▰</span>Widget<span class="ks">/w</span></div>
+            <div class="item"><span class="ico">↗</span>Link card<span class="ks">/l</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  function toggleTheme() {
+    const html = document.documentElement;
+    const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    html.dataset.theme = next;
+    const lbl = document.getElementById('theme-label');
+    if (lbl) lbl.textContent = next.toUpperCase();
+    try { localStorage.setItem('basecamp-theme', next); } catch (e) {}
+  }
+  (function() {
+    try {
+      const saved = localStorage.getItem('basecamp-theme');
+      if (saved) {
+        document.documentElement.dataset.theme = saved;
+        const lbl = document.getElementById('theme-label');
+        if (lbl) lbl.textContent = saved.toUpperCase();
+      }
+    } catch (e) {}
+  })();
+
+  // Toggle-group buttons inside notes header
+  document.querySelectorAll('.toggle-group').forEach(g => {
+    g.addEventListener('click', e => {
+      if (e.target.tagName !== 'BUTTON') return;
+      g.querySelectorAll('button').forEach(b => b.classList.remove('on'));
+      e.target.classList.add('on');
+    });
+  });
+
+  // Notes click highlight
+  document.querySelectorAll('.note').forEach(n => {
+    n.addEventListener('click', () => {
+      document.querySelectorAll('.note').forEach(x => x.classList.remove('active'));
+      n.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

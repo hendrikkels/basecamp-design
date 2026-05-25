@@ -1,0 +1,696 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>basecamp — design system v0.1</title>
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="components.css" />
+<style>
+  body { overflow-x: hidden; }
+  .wrap { max-width: var(--max); margin: 0 auto; padding: 0 32px; }
+
+  /* HERO */
+  .hub-hero {
+    padding: 96px 0 64px;
+    position: relative;
+  }
+  .hub-hero::before {
+    content: '▰▱▰▱▰▱▰▱▰▱';
+    position: absolute;
+    top: 48px; right: -80px;
+    font-family: var(--mono);
+    font-size: 200px;
+    color: var(--surface-1);
+    letter-spacing: -0.08em;
+    transform: rotate(-8deg);
+    pointer-events: none;
+    user-select: none;
+    z-index: -1;
+    opacity: 0.6;
+  }
+  .hub-hero .eyebrow {
+    color: var(--dim); font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 14px; margin-bottom: 32px;
+  }
+  .hub-hero .eyebrow .ac { color: var(--acc); font-family: var(--mono); letter-spacing: -0.05em; font-size: 14px; }
+  .hub-hero h1 {
+    font-family: var(--display);
+    font-size: clamp(64px, 10vw, 160px);
+    letter-spacing: -0.04em;
+    line-height: 0.86;
+    margin: 0;
+    max-width: 14ch;
+  }
+  .hub-hero h1 .acc { color: var(--acc); }
+  .hub-hero h1 .stop { display: inline-block; width: 0.18em; height: 0.18em; background: var(--acc); margin-left: 0.04em; vertical-align: 0.06em; }
+  .hub-hero p {
+    color: var(--muted); font-size: 16px; line-height: 1.6;
+    max-width: 56ch; margin: 28px 0 0;
+  }
+
+  /* META BAR */
+  .meta-bar {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    margin: 56px 0 80px;
+  }
+  .meta-bar > div {
+    padding: 16px 20px 16px 0;
+    border-right: 1px solid var(--hairline);
+    font-size: 11px;
+  }
+  .meta-bar > div:last-child { border-right: 0; }
+  .meta-bar .k { color: var(--dim); text-transform: uppercase; font-size: 10px; letter-spacing: 0.16em; margin-bottom: 6px; }
+  .meta-bar .v { color: var(--text); }
+  .meta-bar .v.acc { color: var(--acc); }
+
+  /* SECTION HEAD */
+  .ms-head {
+    display: grid;
+    grid-template-columns: 96px 1fr auto;
+    gap: 32px; align-items: end;
+    padding-bottom: 24px;
+    margin-bottom: 40px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .ms-head .num {
+    font-family: var(--display); font-size: 88px;
+    letter-spacing: -0.04em; line-height: 0.85;
+  }
+  .ms-head .num em { color: var(--acc); font-style: normal; }
+  .ms-head .t {
+    font-family: var(--display); font-size: 40px;
+    letter-spacing: -0.025em; line-height: 1; margin: 0;
+  }
+  .ms-head .sub { color: var(--muted); font-size: 13px; margin-top: 8px; max-width: 60ch; line-height: 1.55; }
+  .ms-head .meta { font-size: 11px; letter-spacing: 0.08em; color: var(--dim); text-align: right; text-transform: uppercase; }
+
+  .section { padding: 64px 0 32px; }
+
+  /* DELIVERABLE CARDS */
+  .cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .deliv {
+    background: var(--surface-1);
+    border-radius: var(--r-sm);
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--text);
+    display: flex; flex-direction: column;
+    transition: background var(--dur-fast);
+    position: relative;
+  }
+  .deliv:hover { background: var(--surface-2); }
+  .deliv .preview {
+    background: var(--surface-0);
+    aspect-ratio: 16 / 9;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .deliv .body {
+    padding: 20px 24px 24px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .deliv .body .meta {
+    display: flex; gap: 12px; align-items: center;
+    font-size: 10px; letter-spacing: 0.16em; color: var(--dim);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .deliv .body .meta .acc { color: var(--acc); }
+  .deliv .body .ttl {
+    font-family: var(--display); font-size: 32px;
+    letter-spacing: -0.025em; line-height: 1; margin: 0 0 6px;
+  }
+  .deliv .body .desc { color: var(--muted); font-size: 12px; line-height: 1.55; margin: 0 0 16px; }
+  .deliv .body .foot {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: auto; padding-top: 14px;
+    border-top: 1px solid var(--hairline);
+    font-size: 10px; letter-spacing: 0.12em; color: var(--dim);
+    text-transform: uppercase;
+  }
+  .deliv .body .foot .arr { color: var(--acc); font-family: var(--display); font-size: 16px;}
+  .deliv .corner {
+    position: absolute; top: 0; left: 0;
+    width: 36px; height: 4px;
+    background: var(--acc);
+    z-index: 2;
+  }
+
+  /* PREVIEW THUMBNAILS — abstract miniatures */
+  .deliv.deliv-ds .preview { display: grid; grid-template-columns: 60px 1fr; gap: 0; }
+  .deliv.deliv-ds .preview .toc {
+    background: var(--surface-1); padding: 12px 8px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .deliv.deliv-ds .preview .toc .l { height: 4px; background: var(--surface-3); border-radius: 1px; }
+  .deliv.deliv-ds .preview .toc .l.acc { background: var(--acc); }
+  .deliv.deliv-ds .preview .body {
+    padding: 20px 24px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .deliv.deliv-ds .preview .body .h {
+    font-family: var(--display); font-size: 32px;
+    letter-spacing: -0.025em; line-height: 0.9;
+    margin: 0;
+  }
+  .deliv.deliv-ds .preview .body .h .acc { color: var(--acc); }
+  .deliv.deliv-ds .preview .body .swatches {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px;
+    margin-top: 6px;
+  }
+  .deliv.deliv-ds .preview .body .swatches > div { height: 18px; border-radius: 2px; }
+  .deliv.deliv-ds .preview .body .btns {
+    display: flex; gap: 6px; margin-top: 4px;
+  }
+  .deliv.deliv-ds .preview .body .btns > div {
+    height: 16px; padding: 0 8px;
+    border-radius: 2px;
+    background: var(--surface-3);
+    font-size: 8px;
+    display: grid; place-items: center;
+    color: var(--muted); letter-spacing: 0.12em;
+  }
+  .deliv.deliv-ds .preview .body .btns > div.acc { background: var(--acc); color: var(--acc-on); }
+
+  .deliv.deliv-land .preview {
+    display: flex; flex-direction: column; padding: 16px 20px; gap: 8px;
+  }
+  .deliv.deliv-land .preview .nav {
+    display: flex; align-items: center; gap: 16px;
+    font-family: var(--mono); font-size: 9px; color: var(--dim);
+    letter-spacing: 0.16em; padding-bottom: 6px;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .deliv.deliv-land .preview .nav .b { width: 10px; height: 10px; background: var(--acc); }
+  .deliv.deliv-land .preview .h {
+    font-family: var(--display);
+    font-size: 48px; letter-spacing: -0.04em; line-height: 0.9;
+    margin: 16px 0 0;
+  }
+  .deliv.deliv-land .preview .h .acc { color: var(--acc); }
+  .deliv.deliv-land .preview .h .stop { display: inline-block; width: 0.14em; height: 0.14em; background: var(--acc); margin-left: 0.04em; vertical-align: 0.06em; }
+  .deliv.deliv-land .preview .stripe {
+    margin-top: auto; height: 28px;
+    background: var(--surface-1);
+    border-radius: 2px;
+    display: flex; gap: 14px; padding: 0 14px;
+    align-items: center;
+    font-family: var(--mono); font-size: 9px; color: var(--dim);
+    letter-spacing: 0.12em;
+  }
+  .deliv.deliv-land .preview .stripe .acc { color: var(--acc); }
+
+  .deliv.deliv-app .preview {
+    display: grid; grid-template-columns: 38px 80px 1fr; height: 100%;
+  }
+  .deliv.deliv-app .preview .nav {
+    background: var(--surface-1);
+    padding: 14px 6px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .deliv.deliv-app .preview .nav .b { width: 12px; height: 12px; background: var(--acc); margin-bottom: 10px;}
+  .deliv.deliv-app .preview .nav .i { height: 4px; background: var(--surface-3); border-radius: 1px; }
+  .deliv.deliv-app .preview .nav .i.on { background: var(--acc); }
+  .deliv.deliv-app .preview .list {
+    padding: 14px 8px;
+    display: flex; flex-direction: column; gap: 6px;
+    border-left: 1px solid var(--hairline);
+    border-right: 1px solid var(--hairline);
+  }
+  .deliv.deliv-app .preview .list .row {
+    display: flex; flex-direction: column; gap: 3px;
+    padding: 4px 4px; border-radius: 2px;
+  }
+  .deliv.deliv-app .preview .list .row.active { background: var(--surface-2); }
+  .deliv.deliv-app .preview .list .row .t { height: 6px; background: var(--surface-3); width: 80%; border-radius: 1px; }
+  .deliv.deliv-app .preview .list .row.active .t { background: var(--text); }
+  .deliv.deliv-app .preview .list .row .s { height: 3px; background: var(--surface-3); width: 60%; border-radius: 1px; }
+  .deliv.deliv-app .preview .editor {
+    padding: 18px 22px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .deliv.deliv-app .preview .editor .h {
+    font-family: var(--display); font-size: 22px; letter-spacing: -0.02em; line-height: 1; margin: 0 0 4px;
+  }
+  .deliv.deliv-app .preview .editor .l {
+    height: 4px; background: var(--surface-3); border-radius: 1px; width: 90%;
+  }
+  .deliv.deliv-app .preview .editor .l.s { width: 60%; }
+  .deliv.deliv-app .preview .editor .l.m { width: 75%; }
+
+  .deliv.deliv-dash .preview {
+    display: grid; grid-template-columns: 38px 1fr; height: 100%;
+  }
+  .deliv.deliv-dash .preview .nav {
+    background: var(--surface-1);
+    padding: 14px 6px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .deliv.deliv-dash .preview .nav .b { width: 12px; height: 12px; background: var(--acc); margin-bottom: 10px;}
+  .deliv.deliv-dash .preview .nav .i { height: 4px; background: var(--surface-3); border-radius: 1px; }
+  .deliv.deliv-dash .preview .nav .i.on { background: var(--acc); }
+  .deliv.deliv-dash .preview .main { padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+  .deliv.deliv-dash .preview .h {
+    font-family: var(--display); font-size: 22px; letter-spacing: -0.02em; line-height: 1; margin: 0 0 4px;
+  }
+  .deliv.deliv-dash .preview .h em { color: var(--muted); font-style: normal; }
+  .deliv.deliv-dash .preview .kpi-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
+  }
+  .deliv.deliv-dash .preview .kpi-row .k {
+    background: var(--surface-1); border-radius: 2px;
+    padding: 6px 6px; position: relative;
+  }
+  .deliv.deliv-dash .preview .kpi-row .k::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 12px; height: 2px; background: var(--acc);
+  }
+  .deliv.deliv-dash .preview .kpi-row .k .l { height: 3px; background: var(--surface-3); width: 70%; border-radius: 1px; margin-bottom: 4px;}
+  .deliv.deliv-dash .preview .kpi-row .k .v {
+    font-family: var(--display); font-size: 14px; letter-spacing: -0.02em; line-height: 1;
+  }
+  .deliv.deliv-dash .preview .chart-row {
+    display: grid; grid-template-columns: 2fr 1fr; gap: 4px; flex: 1;
+  }
+  .deliv.deliv-dash .preview .chart-row .c {
+    background: var(--surface-1); border-radius: 2px; padding: 8px;
+    position: relative;
+  }
+  .deliv.deliv-dash .preview .chart-row .c svg { width: 100%; height: 100%; }
+
+  /* SYSTEM RESOURCES */
+  .res-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .res {
+    background: var(--surface-1);
+    padding: 18px;
+    border-radius: var(--r-sm);
+    text-decoration: none;
+    color: var(--text);
+    display: flex; flex-direction: column; gap: 10px;
+    transition: background var(--dur-fast);
+  }
+  .res:hover { background: var(--surface-2); }
+  .res .mk {
+    font-family: var(--mono);
+    font-size: 18px; color: var(--acc); letter-spacing: -0.05em;
+    line-height: 1;
+  }
+  .res .ttl { font-family: var(--display); font-size: 16px; letter-spacing: -0.01em; line-height: 1.1;}
+  .res .sub { color: var(--dim); font-size: 11px; letter-spacing: 0.04em; }
+
+  /* CHANGELOG */
+  .changelog {
+    background: var(--surface-1);
+    padding: 28px 32px;
+    border-radius: var(--r-sm);
+  }
+  .log-row {
+    display: grid; grid-template-columns: 100px 80px 1fr auto;
+    gap: 24px; align-items: baseline;
+    padding: 14px 0;
+    border-top: 1px solid var(--hairline);
+  }
+  .log-row:first-child { border-top: 0; }
+  .log-row .v { font-family: var(--display); font-size: 16px; letter-spacing: -0.01em; }
+  .log-row .v .acc { color: var(--acc); }
+  .log-row .d { color: var(--dim); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;}
+  .log-row .m { color: var(--muted); font-size: 13px; }
+  .log-row .badge-cell { display: flex; gap: 4px; }
+
+  /* FOOTER */
+  .ft-mini {
+    margin-top: 96px;
+    padding: 32px 0;
+    border-top: 1px solid var(--hairline);
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 10px; letter-spacing: 0.12em; color: var(--dim);
+    text-transform: uppercase;
+  }
+  .ft-mini .l { display: flex; gap: 24px; }
+  .ft-mini a { color: var(--muted); text-decoration: none; }
+  .ft-mini a:hover { color: var(--text); }
+
+  @media (max-width: 900px) {
+    .cards { grid-template-columns: 1fr; }
+    .res-grid { grid-template-columns: repeat(2, 1fr); }
+    .meta-bar { grid-template-columns: repeat(2, 1fr); }
+    .log-row { grid-template-columns: 80px 1fr; gap: 16px; }
+    .log-row .d, .log-row .badge-cell { grid-column: 2; }
+    .ms-head { grid-template-columns: 1fr; }
+    .ms-head .meta { display: none; }
+  }
+</style>
+</head>
+<body data-screen-label="Index Hub">
+
+<!-- ============ TOP NAV ============ -->
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a class="brand" href="index.html"><span class="block"></span>basecamp <small>v0.1</small></a>
+    <span class="nav-meta">design system · direction C · block / retro</span>
+    <span class="nav-links">
+      <a href="index.html" class="active"><span class="idx">/</span>HOME</a>
+      <a href="Design System.html"><span class="idx">▰</span>SYSTEM</a>
+      <a href="Marketing Landing.html"><span class="idx">→</span>LANDING</a>
+      <a href="App Shell.html"><span class="idx">→</span>APP</a>
+      <a href="Dashboard.html"><span class="idx">→</span>DASH</a>
+    </span>
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <span class="sq"></span><span id="theme-label">DARK</span>
+    </button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <!-- ============ HERO ============ -->
+  <section class="hub-hero">
+    <div class="eyebrow">
+      <span class="ac">▰▰▰▱</span>
+      <span>BASECAMP · DESIGN SYSTEM · v0.1 · DIRECTION C · MAY 2026</span>
+    </div>
+    <h1>One <span class="acc">room</span>,<br/>fully kitted<span class="stop"></span></h1>
+    <p>
+      A complete design system + three layout mocks for basecamp — the landing, the app shell, and
+      the dashboard. JetBrains Mono on the wall, Arial Black for the moments, acid lime for the
+      thing that matters, and one block character set to glue it all together.
+    </p>
+  </section>
+
+  <!-- META BAR -->
+  <div class="meta-bar">
+    <div><div class="k">DIRECTION</div><div class="v acc">▰ C — BLOCK</div></div>
+    <div><div class="k">VERSION</div><div class="v">v0.1 — DRAFT</div></div>
+    <div><div class="k">FILES</div><div class="v">7 · 2 CSS</div></div>
+    <div><div class="k">MODE</div><div class="v">DARK + LIGHT</div></div>
+    <div><div class="k">UPDATED</div><div class="v">MAY 24, 2026</div></div>
+  </div>
+
+  <!-- ============ DELIVERABLES ============ -->
+  <section class="section">
+    <div class="ms-head">
+      <div class="num">01<em>.</em></div>
+      <div>
+        <h2 class="t">DELIVERABLES</h2>
+        <div class="sub">The design system page, plus three layout mocks composing the components into real screens. Click in.</div>
+      </div>
+      <div class="meta">4 PAGES</div>
+    </div>
+
+    <div class="cards">
+      <!-- Design System -->
+      <a href="Design System.html" class="deliv deliv-ds">
+        <div class="corner"></div>
+        <div class="preview">
+          <div class="toc">
+            <div class="l"></div><div class="l"></div><div class="l acc"></div><div class="l"></div>
+            <div class="l"></div><div class="l"></div><div class="l"></div>
+            <div class="l" style="width: 60%;"></div>
+            <div class="l"></div><div class="l"></div>
+          </div>
+          <div class="body">
+            <div class="h">The <span class="acc">room</span><br/>is on.</div>
+            <div class="swatches">
+              <div style="background: var(--surface-3);"></div>
+              <div style="background: var(--surface-2);"></div>
+              <div style="background: var(--muted);"></div>
+              <div style="background: var(--text);"></div>
+              <div style="background: var(--acc);"></div>
+              <div style="background: var(--danger);"></div>
+            </div>
+            <div class="btns">
+              <div class="acc">▸ PRIMARY</div>
+              <div>SECONDARY</div>
+              <div>GHOST</div>
+            </div>
+          </div>
+        </div>
+        <div class="body">
+          <div class="meta"><span class="acc">▰ 01</span><span>FOUNDATIONS · 22 SECTIONS</span></div>
+          <h3 class="ttl">Design system.</h3>
+          <p class="desc">The component library. Every primitive, every variant, every state — color, type, buttons, inputs, tables, charts, KPI tiles, alerts, modals, the lot.</p>
+          <div class="foot"><span>tokens.css · components.css · Design System.html</span><span class="arr">→</span></div>
+        </div>
+      </a>
+
+      <!-- Marketing Landing -->
+      <a href="Marketing Landing.html" class="deliv deliv-land">
+        <div class="corner"></div>
+        <div class="preview">
+          <div class="nav">
+            <span class="b"></span>
+            <span>BASECAMP</span>
+            <span style="margin-left: auto;">WORK · WRITING · ABOUT</span>
+          </div>
+          <h4 class="h">The <span class="acc">room</span><br/>is on<span class="stop"></span></h4>
+          <div class="stripe">
+            <span class="acc">▰ ONLINE</span>
+            <span>14 DEPLOYS</span>
+            <span>47 POSTS</span>
+            <span style="margin-left: auto;" class="acc">→</span>
+          </div>
+        </div>
+        <div class="body">
+          <div class="meta"><span class="acc">▰ 02</span><span>MARKETING · PUBLIC</span></div>
+          <h3 class="ttl">Marketing landing.</h3>
+          <p class="desc">The front door. Hero with a now-strip widget, work grid (featured + side tiles), writing index, about / contact, and a footer with character.</p>
+          <div class="foot"><span>Marketing Landing.html</span><span class="arr">→</span></div>
+        </div>
+      </a>
+
+      <!-- App Shell -->
+      <a href="App Shell.html" class="deliv deliv-app">
+        <div class="corner"></div>
+        <div class="preview">
+          <div class="nav">
+            <span class="b"></span>
+            <span class="i"></span><span class="i on"></span><span class="i"></span><span class="i"></span><span class="i"></span>
+            <span style="height: 8px;"></span>
+            <span class="i"></span><span class="i"></span><span class="i"></span>
+          </div>
+          <div class="list">
+            <div class="row active"><div class="t"></div><div class="s"></div></div>
+            <div class="row"><div class="t"></div><div class="s"></div></div>
+            <div class="row"><div class="t"></div><div class="s"></div></div>
+            <div class="row"><div class="t"></div><div class="s"></div></div>
+          </div>
+          <div class="editor">
+            <h4 class="h">The discipline of things.</h4>
+            <div class="l"></div>
+            <div class="l m"></div>
+            <div class="l"></div>
+            <div class="l s"></div>
+            <div class="l m"></div>
+          </div>
+        </div>
+        <div class="body">
+          <div class="meta"><span class="acc">▰ 03</span><span>APP · INTERNAL</span></div>
+          <h3 class="ttl">App shell.</h3>
+          <p class="desc">Three-column app shell — sidebar, posts list, editor. Inline slash-command popover, autosave indicator, and an editor body styled for long-form.</p>
+          <div class="foot"><span>App Shell.html</span><span class="arr">→</span></div>
+        </div>
+      </a>
+
+      <!-- Dashboard -->
+      <a href="Dashboard.html" class="deliv deliv-dash">
+        <div class="corner"></div>
+        <div class="preview">
+          <div class="nav">
+            <span class="b"></span>
+            <span class="i on"></span><span class="i"></span><span class="i"></span><span class="i"></span>
+            <span style="height: 8px;"></span>
+            <span class="i"></span><span class="i"></span>
+          </div>
+          <div class="main">
+            <h4 class="h">Good evening, <em>Hendrik.</em></h4>
+            <div class="kpi-row">
+              <div class="k"><div class="l"></div><div class="v" style="font-feature-settings:'tnum'">12.8K</div></div>
+              <div class="k"><div class="l"></div><div class="v" style="font-feature-settings:'tnum'">047</div></div>
+              <div class="k"><div class="l"></div><div class="v" style="font-feature-settings:'tnum'">4:18</div></div>
+              <div class="k"><div class="l"></div><div class="v" style="font-feature-settings:'tnum'">1.2K</div></div>
+            </div>
+            <div class="chart-row">
+              <div class="c">
+                <svg viewBox="0 0 100 40" preserveAspectRatio="none">
+                  <path d="M0,30 L20,26 L40,22 L60,16 L80,10 L100,4 L100,40 L0,40 Z" fill="var(--acc)" opacity="0.12"/>
+                  <path d="M0,30 L20,26 L40,22 L60,16 L80,10 L100,4" fill="none" stroke="var(--acc)" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+                </svg>
+              </div>
+              <div class="c">
+                <svg viewBox="0 0 60 40">
+                  <rect x="2"  y="22" width="6" height="16" fill="var(--surface-3)"/>
+                  <rect x="11" y="18" width="6" height="20" fill="var(--surface-3)"/>
+                  <rect x="20" y="14" width="6" height="24" fill="var(--surface-3)"/>
+                  <rect x="29" y="10" width="6" height="28" fill="var(--acc)"/>
+                  <rect x="38" y="16" width="6" height="22" fill="var(--surface-3)"/>
+                  <rect x="47" y="6"  width="6" height="32" fill="var(--surface-3)"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body">
+          <div class="meta"><span class="acc">▰ 04</span><span>DASH · INTERNAL</span></div>
+          <h3 class="ttl">Dashboard.</h3>
+          <p class="desc">Sidebar + KPI row + featured chart + recent posts table + widget shelf (now-playing, calendar, habits, reading, build status, activity).</p>
+          <div class="foot"><span>Dashboard.html</span><span class="arr">→</span></div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ SYSTEM RESOURCES ============ -->
+  <section class="section">
+    <div class="ms-head">
+      <div class="num">02<em>.</em></div>
+      <div>
+        <h2 class="t">SYSTEM</h2>
+        <div class="sub">Jump straight to a section of the design system, or open the source files.</div>
+      </div>
+      <div class="meta">22 SECTIONS</div>
+    </div>
+
+    <div class="res-grid">
+      <a href="Design System.html#color" class="res">
+        <div class="mk">▰▱▱</div>
+        <div class="ttl">Color</div>
+        <div class="sub">Surfaces, ink, signals · 12 tokens</div>
+      </a>
+      <a href="Design System.html#type" class="res">
+        <div class="mk">A B</div>
+        <div class="ttl">Type</div>
+        <div class="sub">JetBrains Mono + Arial Black</div>
+      </a>
+      <a href="Design System.html#spacing" class="res">
+        <div class="mk">━ ┃</div>
+        <div class="ttl">Spacing &amp; Radii</div>
+        <div class="sub">4px scale · 5 radii</div>
+      </a>
+      <a href="Design System.html#motifs" class="res">
+        <div class="mk">░▒▓</div>
+        <div class="ttl">Motifs</div>
+        <div class="sub">Block characters &amp; marks</div>
+      </a>
+      <a href="Design System.html#buttons" class="res">
+        <div class="mk">[▸]</div>
+        <div class="ttl">Buttons</div>
+        <div class="sub">5 variants · 3 sizes</div>
+      </a>
+      <a href="Design System.html#inputs" class="res">
+        <div class="mk">|_</div>
+        <div class="ttl">Inputs</div>
+        <div class="sub">Text · search · password · textarea</div>
+      </a>
+      <a href="Design System.html#tables" class="res">
+        <div class="mk">▣▣▣</div>
+        <div class="ttl">Tables</div>
+        <div class="sub">Sticky head · hairlines · select rows</div>
+      </a>
+      <a href="Design System.html#charts" class="res">
+        <div class="mk">▟▙▟</div>
+        <div class="ttl">Charts</div>
+        <div class="sub">Spark · bar · line</div>
+      </a>
+      <a href="Design System.html#kpi" class="res">
+        <div class="mk">128</div>
+        <div class="ttl">KPI tiles</div>
+        <div class="sub">Display value + sparkline + delta</div>
+      </a>
+      <a href="Design System.html#alerts" class="res">
+        <div class="mk">▮▮</div>
+        <div class="ttl">Alerts &amp; banners</div>
+        <div class="sub">5 tones · inline + full-width</div>
+      </a>
+      <a href="Design System.html#modals" class="res">
+        <div class="mk">□ □</div>
+        <div class="ttl">Modals &amp; drawers</div>
+        <div class="sub">Confirm · inspector · backdrop</div>
+      </a>
+      <a href="Design System.html#forms" class="res">
+        <div class="mk">__/</div>
+        <div class="ttl">Forms</div>
+        <div class="sub">Two-column settings layout</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ CHANGELOG ============ -->
+  <section class="section">
+    <div class="ms-head">
+      <div class="num">03<em>.</em></div>
+      <div>
+        <h2 class="t">CHANGELOG</h2>
+        <div class="sub">What landed when. Earlier directions kept as archive — flip back any time.</div>
+      </div>
+      <div class="meta">v0.0 → v0.1</div>
+    </div>
+
+    <div class="changelog">
+      <div class="log-row">
+        <span class="v">v0.<span class="acc">1</span></span>
+        <span class="d">MAY 24, 2026</span>
+        <span class="m">Direction C committed. Full component library (22 sections), tokens.css + components.css, plus three layout mocks — landing, app shell, dashboard.</span>
+        <span class="badge-cell"><span class="badge acc">LIVE</span></span>
+      </div>
+      <div class="log-row">
+        <span class="v">v0.<span class="acc">0</span>·3</span>
+        <span class="d">MAY 24, 2026</span>
+        <span class="m">Direction C selected. "Block / Retro" — frosted blur surfaces, block-character motifs, acid lime accent.</span>
+        <span class="badge-cell"><span class="badge">DECISION</span></span>
+      </div>
+      <div class="log-row">
+        <span class="v">v0.<span class="acc">0</span>·2</span>
+        <span class="d">MAY 24, 2026</span>
+        <span class="m">Three directions explored side-by-side on a single page — Terminal/Ticker, Passport, Block/Retro.</span>
+        <span class="badge-cell"><a href="Design Directions.html" style="text-decoration: none;"><span class="badge outline">VIEW ARCHIVE ↗</span></a></span>
+      </div>
+      <div class="log-row">
+        <span class="v">v0.<span class="acc">0</span>·1</span>
+        <span class="d">MAY 24, 2026</span>
+        <span class="m">Brief locked. Cool green-tinted dark + warm off-white light. JetBrains Mono + Arial Black. Tiny radius. Subtle grain. Background contrast over borders.</span>
+        <span class="badge-cell"><span class="badge">BRIEF</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="ft-mini">
+    <div class="l">
+      <span><span style="color: var(--acc);">▰</span> BASECAMP · DESIGN · v0.1</span>
+      <span>DIRECTION C · BLOCK / RETRO</span>
+    </div>
+    <div class="l">
+      <a href="Design Directions.html">DIRECTIONS ARCHIVE</a>
+      <a href="Design System.html">SYSTEM</a>
+      <a href="Marketing Landing.html">LANDING</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+  function toggleTheme() {
+    const html = document.documentElement;
+    const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    html.dataset.theme = next;
+    const lbl = document.getElementById('theme-label');
+    if (lbl) lbl.textContent = next.toUpperCase();
+    try { localStorage.setItem('basecamp-theme', next); } catch (e) {}
+  }
+  (function() {
+    try {
+      const saved = localStorage.getItem('basecamp-theme');
+      if (saved) {
+        document.documentElement.dataset.theme = saved;
+        const lbl = document.getElementById('theme-label');
+        if (lbl) lbl.textContent = saved.toUpperCase();
+      }
+    } catch (e) {}
+  })();
+</script>
+</body>
+</html>

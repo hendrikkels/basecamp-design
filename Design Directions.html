@@ -1,0 +1,1291 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>basecamp — design directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+<style>
+/* =========================================================
+   FOUNDATIONS — shared by all three directions
+   ========================================================= */
+:root {
+  /* Dark — cool green-tinted */
+  --d-bg:        #0b0d0c;
+  --d-surface-1: #111413;
+  --d-surface-2: #181c1a;
+  --d-surface-3: #20251f;
+  --d-hairline:  rgba(230,235,232,0.07);
+  --d-rule:      rgba(230,235,232,0.12);
+  --d-text:      #e6ebe8;
+  --d-muted:     #9aa4a0;
+  --d-dim:       #6b7773;
+  --d-faint:     #4a544f;
+
+  /* Light — warm off-white, slight green tint */
+  --l-bg:        #efece4;
+  --l-surface-1: #e7e3d9;
+  --l-surface-2: #ddd8cb;
+  --l-surface-3: #d2ccbd;
+  --l-hairline:  rgba(20,22,24,0.07);
+  --l-rule:      rgba(20,22,24,0.14);
+  --l-text:      #15171a;
+  --l-muted:     #4f534e;
+  --l-dim:       #7c8079;
+  --l-faint:     #a8aca4;
+
+  /* Per-direction accents */
+  --acc-a: #d4a44b;     /* sodium amber */
+  --acc-b: #b14439;     /* passport red */
+  --acc-c: #b8e63a;     /* acid lime */
+
+  /* Type */
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --display: 'Arial Black','Helvetica Neue Bold','Helvetica Bold',Helvetica,Arial,sans-serif;
+
+  /* Radii */
+  --r-xs: 2px;
+  --r-sm: 3px;
+  --r-md: 4px;
+
+  /* Density */
+  --max: 1320px;
+}
+
+html[data-theme="dark"] {
+  --bg: var(--d-bg);
+  --surface-1: var(--d-surface-1);
+  --surface-2: var(--d-surface-2);
+  --surface-3: var(--d-surface-3);
+  --hairline:  var(--d-hairline);
+  --rule:      var(--d-rule);
+  --text:      var(--d-text);
+  --muted:     var(--d-muted);
+  --dim:       var(--d-dim);
+  --faint:     var(--d-faint);
+  color-scheme: dark;
+}
+html[data-theme="light"] {
+  --bg: var(--l-bg);
+  --surface-1: var(--l-surface-1);
+  --surface-2: var(--l-surface-2);
+  --surface-3: var(--l-surface-3);
+  --hairline:  var(--l-hairline);
+  --rule:      var(--l-rule);
+  --text:      var(--l-text);
+  --muted:     var(--l-muted);
+  --dim:       var(--l-dim);
+  --faint:     var(--l-faint);
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.55;
+  font-feature-settings: "ss01","ss02","cv11";
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: 0.005em;
+}
+
+/* Grain overlay — texture_intensity 20 */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 200;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+}
+html[data-theme="light"] body::before { opacity: 0.09; mix-blend-mode: multiply; }
+
+/* =========================================================
+   TOP NAV
+   ========================================================= */
+.topnav {
+  position: sticky; top: 0; z-index: 50;
+  background: color-mix(in oklab, var(--bg) 78%, transparent);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border-bottom: 1px solid var(--hairline);
+}
+.topnav-inner {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 14px 32px;
+  display: flex; align-items: center; gap: 24px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.brand {
+  font-family: var(--display);
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  text-transform: none;
+}
+.brand .dot { display: inline-block; width: 7px; height: 7px; background: var(--text); margin-right: 8px; vertical-align: 2px; }
+.nav-meta { color: var(--dim); }
+.dirjump { display: flex; gap: 0; margin-left: auto; }
+.dirjump a {
+  color: var(--muted);
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: var(--r-xs);
+  transition: background 120ms, color 120ms;
+}
+.dirjump a:hover { background: var(--surface-2); color: var(--text); }
+.dirjump a .idx { color: var(--dim); margin-right: 6px; }
+.theme-toggle {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 0;
+  padding: 6px 10px;
+  font-family: inherit; font-size: 11px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  border-radius: var(--r-xs);
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.theme-toggle:hover { background: var(--surface-3); }
+.theme-toggle .sq { width: 8px; height: 8px; background: var(--text); display: inline-block; }
+html[data-theme="light"] .theme-toggle .sq { background: var(--bg); outline: 1px solid var(--text); }
+
+/* =========================================================
+   PAGE INTRO
+   ========================================================= */
+.intro {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 80px 32px 40px;
+}
+.intro .label { color: var(--dim); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 24px; }
+.intro h1 {
+  font-family: var(--display);
+  font-size: clamp(48px, 7vw, 96px);
+  line-height: 0.92;
+  letter-spacing: -0.025em;
+  margin: 0 0 24px;
+  max-width: 14ch;
+}
+.intro h1 em { font-style: normal; color: var(--muted); }
+.intro p {
+  max-width: 56ch;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.intro .meta {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin-top: 56px;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+.intro .meta > div {
+  padding: 14px 16px 14px 0;
+  border-right: 1px solid var(--hairline);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+.intro .meta > div:last-child { border-right: 0; }
+.intro .meta .k { color: var(--dim); text-transform: uppercase; margin-bottom: 6px; font-size: 10px; letter-spacing: 0.12em;}
+.intro .meta .v { color: var(--text); }
+
+/* =========================================================
+   DIRECTION WRAPPER
+   ========================================================= */
+.dir {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 96px 32px 80px;
+  position: relative;
+}
+.dir-head {
+  display: grid;
+  grid-template-columns: 96px 1fr auto;
+  gap: 24px;
+  align-items: end;
+  padding-bottom: 24px;
+  margin-bottom: 48px;
+  border-bottom: 1px solid var(--rule);
+}
+.dir-head .num {
+  font-family: var(--display);
+  font-size: 96px;
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  color: var(--text);
+}
+.dir-head .ttl {
+  font-family: var(--display);
+  font-size: 40px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.dir-head .sub {
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  margin-top: 8px;
+  max-width: 60ch;
+}
+.dir-head .tag {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dim);
+  padding: 6px 10px;
+  background: var(--surface-2);
+  border-radius: var(--r-xs);
+}
+
+/* SECTION (within a direction) */
+.sec { margin-top: 56px; }
+.sec-head {
+  display: flex; align-items: baseline; gap: 16px;
+  font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 20px;
+}
+.sec-head::before {
+  content: ''; height: 1px; background: var(--rule); flex: 0 0 32px;
+}
+.sec-head .num { color: var(--text); font-weight: 600; }
+.sec-head .name { color: var(--muted); letter-spacing: 0.12em;}
+
+/* Grid helpers */
+.row { display: grid; gap: 16px; }
+.row.r2 { grid-template-columns: repeat(2, 1fr); }
+.row.r3 { grid-template-columns: repeat(3, 1fr); }
+.row.r4 { grid-template-columns: repeat(4, 1fr); }
+.row.r5 { grid-template-columns: repeat(5, 1fr); }
+.row.r6 { grid-template-columns: repeat(6, 1fr); }
+
+/* SWATCH */
+.swatch {
+  display: flex; flex-direction: column;
+  height: 96px;
+  padding: 10px 12px;
+  justify-content: space-between;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  border-radius: var(--r-xs);
+}
+.swatch .nm { text-transform: uppercase; }
+.swatch .hex { font-feature-settings: "tnum"; }
+
+/* COMPONENT TILE — used in samples */
+.tile {
+  background: var(--surface-1);
+  padding: 24px;
+  border-radius: var(--r-sm);
+  position: relative;
+}
+.tile .corner {
+  position: absolute; top: 8px; right: 10px;
+  font-size: 10px; letter-spacing: 0.1em; color: var(--dim);
+  text-transform: uppercase;
+}
+.tile-grid {
+  display: grid; gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  align-items: start;
+}
+
+/* GENERIC INPUTS / BUTTONS used across all directions */
+.btn {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: var(--r-xs);
+  border: 0;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: background 120ms, color 120ms, transform 80ms;
+}
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--text); color: var(--bg); }
+.btn-primary:hover { background: var(--muted); }
+.btn-secondary { background: var(--surface-2); color: var(--text); }
+.btn-secondary:hover { background: var(--surface-3); }
+.btn-ghost { background: transparent; color: var(--muted); }
+.btn-ghost:hover { background: var(--surface-2); color: var(--text); }
+.btn-destructive { background: #6e2a26; color: #f3d8d4; }
+html[data-theme="light"] .btn-destructive { background: #b14439; color: #fff; }
+.btn-icon { width: 36px; padding: 0; justify-content: center; }
+.btn .ks { color: var(--dim); font-size: 10px; letter-spacing: 0.06em; }
+
+.input {
+  font-family: var(--mono);
+  font-size: 13px;
+  height: 36px;
+  padding: 0 12px;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 0;
+  border-radius: var(--r-xs);
+  width: 100%;
+  outline: 0;
+}
+.input::placeholder { color: var(--dim); }
+.input:focus { background: var(--surface-3); box-shadow: inset 0 0 0 1px var(--rule); }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
+
+/* Badge */
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 3px 8px;
+  background: var(--surface-2); color: var(--text);
+  border-radius: var(--r-xs);
+}
+.badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
+
+/* Table baseline */
+.tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+.tbl th, .tbl td { text-align: left; padding: 10px 12px; }
+.tbl thead th { color: var(--dim); font-weight: 500; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; background: var(--surface-1); }
+.tbl tbody tr { border-top: 1px solid var(--hairline); }
+.tbl tbody tr:hover { background: var(--surface-2); }
+.tbl .num { font-feature-settings: "tnum"; text-align: right; }
+
+/* ─────────────────────────────────────────────────────────
+   DIRECTION A — TERMINAL / TICKER
+   ───────────────────────────────────────────────────────── */
+.dir-a { --acc: var(--acc-a); }
+.dir-a .dir-head .ttl::after { content: ' ▮'; color: var(--acc); }
+.dir-a .swatch-a-bg     { background: var(--bg);       color: var(--text); outline: 1px solid var(--hairline);}
+.dir-a .swatch-a-s1     { background: var(--surface-1); color: var(--text); }
+.dir-a .swatch-a-s2     { background: var(--surface-2); color: var(--text); }
+.dir-a .swatch-a-s3     { background: var(--surface-3); color: var(--text); }
+.dir-a .swatch-a-text   { background: var(--text);     color: var(--bg);   }
+.dir-a .swatch-a-acc    { background: var(--acc);      color: #1a1409;     }
+
+/* Ticker strip */
+.ticker {
+  background: var(--surface-1);
+  padding: 10px 16px;
+  display: flex; gap: 32px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  overflow: hidden;
+  border-radius: var(--r-xs);
+}
+.ticker .item { display: inline-flex; gap: 8px; align-items: baseline; white-space: nowrap; }
+.ticker .item .k { color: var(--dim); text-transform: uppercase; }
+.ticker .item .v { color: var(--text); font-feature-settings: "tnum"; }
+.ticker .item.up .v { color: var(--acc); }
+.ticker .item.up .v::before { content: '▲ '; }
+.ticker .item.down .v::before { content: '▼ '; }
+
+/* Dense KPI tiles */
+.kpi-a {
+  background: var(--surface-1);
+  padding: 18px 18px 16px;
+  border-radius: var(--r-xs);
+  display: flex; flex-direction: column; gap: 12px;
+  position: relative;
+}
+.kpi-a .label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
+.kpi-a .value { font-family: var(--display); font-size: 36px; letter-spacing: -0.02em; line-height: 1; }
+.kpi-a .meta { display:flex; justify-content: space-between; font-size: 10px; color: var(--muted); }
+.kpi-a .meta .delta { color: var(--acc); font-feature-settings: "tnum"; }
+.kpi-a .spark { height: 24px; }
+.kpi-a::before {
+  content: ''; position: absolute; top: 0; left: 0; width: 24px; height: 1px;
+  background: var(--acc);
+}
+
+/* Dir-A buttons override (sharper) */
+.dir-a .btn { border-radius: var(--r-xs); height: 34px; padding: 0 14px; }
+.dir-a .btn-primary { background: var(--acc); color: #1a1409; }
+.dir-a .btn-primary:hover { background: #e6b865; }
+
+/* Dir-A list/table dense */
+.dir-a .tbl tbody td { font-size: 11.5px; font-feature-settings: "tnum"; }
+.dir-a .tbl td .tag {
+  font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 2px 6px; background: var(--surface-2); color: var(--muted);
+  border-radius: 2px;
+}
+.dir-a .tbl td .tag.live { background: var(--acc); color: #1a1409; }
+
+/* ─────────────────────────────────────────────────────────
+   DIRECTION B — PASSPORT
+   ───────────────────────────────────────────────────────── */
+.dir-b { --acc: var(--acc-b); }
+.dir-b .dir-head .ttl::after { content: ' ✦'; color: var(--acc); font-size: 28px; vertical-align: 4px; }
+
+.dir-b .swatch-b-bg     { background: var(--bg);       color: var(--text); outline: 1px solid var(--hairline);}
+.dir-b .swatch-b-s1     { background: var(--surface-1); color: var(--text); }
+.dir-b .swatch-b-s2     { background: var(--surface-2); color: var(--text); }
+.dir-b .swatch-b-s3     { background: var(--surface-3); color: var(--text); }
+.dir-b .swatch-b-text   { background: var(--text);     color: var(--bg);   }
+.dir-b .swatch-b-acc    { background: var(--acc);      color: #fff;        }
+
+/* Stamped card */
+.stamp-card {
+  background: var(--surface-1);
+  padding: 32px;
+  border-radius: var(--r-xs);
+  position: relative;
+  overflow: hidden;
+}
+.stamp-card::before, .stamp-card::after {
+  content: ''; position: absolute; width: 16px; height: 16px;
+  border: 1px solid var(--rule);
+}
+.stamp-card::before { top: 8px; left: 8px; border-right: 0; border-bottom: 0; }
+.stamp-card::after { bottom: 8px; right: 8px; border-left: 0; border-top: 0; }
+.stamp-card .h {
+  font-family: var(--display);
+  font-size: 28px; line-height: 1; letter-spacing: -0.02em;
+  margin: 0 0 8px;
+}
+.stamp-card .seq { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dim); margin-bottom: 24px;}
+.stamp-card .body { color: var(--muted); font-size: 13px; line-height: 1.6; max-width: 48ch; }
+.stamp-card .seal {
+  position: absolute; top: 24px; right: 24px;
+  width: 64px; height: 64px;
+  border: 1px solid var(--acc);
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--acc);
+  text-align: center;
+}
+.stamp-card .seal .yr { font-family: var(--display); font-size: 14px; letter-spacing: 0; }
+
+/* Dir-B big numeral display */
+.b-numeral-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+.b-numeral-row > div {
+  padding: 24px 24px 24px 0;
+  border-right: 1px solid var(--hairline);
+  display: flex; flex-direction: column; gap: 12px;
+}
+.b-numeral-row > div:last-child { border-right: 0; }
+.b-numeral-row .num {
+  font-family: var(--display);
+  font-size: 64px; line-height: 0.9; letter-spacing: -0.03em;
+}
+.b-numeral-row .num em { font-style: normal; color: var(--acc); }
+.b-numeral-row .lbl { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); }
+.b-numeral-row .desc { color: var(--muted); font-size: 12px; max-width: 28ch; }
+
+.dir-b .btn-primary { background: var(--text); color: var(--bg); }
+.dir-b .btn-primary:hover { background: var(--muted); }
+.dir-b .btn-destructive { background: var(--acc); color: #fff; }
+.dir-b .badge.acc { background: var(--acc); color: #fff; }
+
+/* ─────────────────────────────────────────────────────────
+   DIRECTION C — BLOCK / RETRO
+   ───────────────────────────────────────────────────────── */
+.dir-c { --acc: var(--acc-c); }
+.dir-c .dir-head .ttl::after { content: ' ▰▰'; color: var(--acc); font-size: 24px; vertical-align: 4px; letter-spacing: -0.2em;}
+
+.dir-c .swatch-c-bg     { background: var(--bg);       color: var(--text); outline: 1px solid var(--hairline);}
+.dir-c .swatch-c-s1     { background: var(--surface-1); color: var(--text); }
+.dir-c .swatch-c-s2     { background: var(--surface-2); color: var(--text); }
+.dir-c .swatch-c-s3     { background: var(--surface-3); color: var(--text); }
+.dir-c .swatch-c-text   { background: var(--text);     color: var(--bg);   }
+.dir-c .swatch-c-acc    { background: var(--acc);      color: #1a2008;     }
+
+/* Frosted card */
+.frost {
+  background: color-mix(in oklab, var(--surface-2) 70%, transparent);
+  backdrop-filter: blur(10px) saturate(130%);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+  padding: 24px;
+  border-radius: var(--r-sm);
+  position: relative;
+  overflow: hidden;
+}
+.frost::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(135deg, rgba(255,255,255,0.04), transparent 50%);
+}
+html[data-theme="light"] .frost::after {
+  background: linear-gradient(135deg, rgba(255,255,255,0.5), transparent 50%);
+}
+.frost .blockmark {
+  font-family: var(--display);
+  font-size: 11px; letter-spacing: 0.2em;
+  color: var(--acc);
+  margin-bottom: 16px;
+  display: inline-block;
+}
+.frost .h {
+  font-family: var(--display);
+  font-size: 32px; line-height: 1; letter-spacing: -0.02em;
+  margin: 0 0 12px;
+}
+.frost p { color: var(--muted); margin: 0; font-size: 13px; line-height: 1.6; max-width: 38ch; }
+
+/* Block-character motif */
+.block-strip {
+  font-family: var(--mono);
+  font-size: 18px;
+  letter-spacing: -0.05em;
+  color: var(--acc);
+  margin: 32px 0;
+  user-select: none;
+}
+.block-strip .dim { color: var(--dim); }
+
+/* Pixel button */
+.dir-c .btn-primary {
+  background: var(--acc);
+  color: #1a2008;
+  position: relative;
+}
+.dir-c .btn-primary::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.18), transparent 40%);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Pill */
+.pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--surface-2);
+  color: var(--text);
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+.pill .ac { color: var(--acc); }
+.pill.acc { background: var(--acc); color: #1a2008; }
+
+/* Toggles */
+.toggle {
+  width: 36px; height: 20px;
+  background: var(--surface-3);
+  border-radius: 999px;
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.toggle::after {
+  content: ''; position: absolute;
+  top: 2px; left: 2px; width: 16px; height: 16px;
+  background: var(--text); border-radius: 50%;
+  transition: transform 160ms;
+}
+.toggle.on { background: var(--acc); }
+.toggle.on::after { transform: translateX(16px); background: #1a2008; }
+.dir-a .toggle.on { background: var(--acc-a); }
+.dir-a .toggle.on::after { background: #1a1409; }
+.dir-b .toggle.on { background: var(--acc-b); }
+.dir-b .toggle.on::after { background: #fff; }
+
+/* Radio/checkbox squares */
+.check {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.check .box {
+  width: 14px; height: 14px;
+  background: var(--surface-3);
+  border-radius: 2px;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.check.on .box { background: var(--acc); }
+.check.on .box::after { content: '✓'; color: #1a2008; font-size: 10px; line-height: 1; font-weight: 700; }
+.dir-a .check.on .box { background: var(--acc-a); }
+.dir-a .check.on .box::after { color: #1a1409; }
+.dir-b .check.on .box { background: var(--acc-b); }
+.dir-b .check.on .box::after { color: #fff; }
+
+/* Segmented */
+.seg {
+  display: inline-flex;
+  background: var(--surface-2);
+  padding: 3px;
+  border-radius: var(--r-sm);
+  gap: 2px;
+}
+.seg button {
+  background: transparent; border: 0; color: var(--muted);
+  font-family: var(--mono); font-size: 11px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: var(--r-xs);
+  cursor: pointer;
+}
+.seg button.on { background: var(--surface-3); color: var(--text); }
+
+/* Spark SVG */
+.spark-svg { width: 100%; height: 24px; display: block; overflow: visible; }
+.spark-svg path.line { fill: none; stroke: var(--acc); stroke-width: 1.25; vector-effect: non-scaling-stroke; }
+.spark-svg path.area { fill: var(--acc); opacity: 0.12; }
+.dir-a .spark-svg path.line { stroke: var(--acc-a); }
+.dir-a .spark-svg path.area { fill: var(--acc-a); }
+.dir-b .spark-svg path.line { stroke: var(--acc-b); }
+.dir-b .spark-svg path.area { fill: var(--acc-b); }
+
+/* Symbol motif rows */
+.motifs {
+  display: grid; grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+  margin-top: 16px;
+}
+.motif {
+  background: var(--surface-1);
+  padding: 18px 0;
+  text-align: center;
+  border-radius: var(--r-xs);
+  font-size: 18px;
+  color: var(--text);
+}
+.motif.acc { color: var(--acc); }
+.motif .lbl { display: block; font-size: 9px; letter-spacing: 0.12em; color: var(--dim); text-transform: uppercase; margin-top: 6px; }
+
+/* =========================================================
+   FINAL NEXT-STEPS BLOCK
+   ========================================================= */
+.next {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 96px 32px 120px;
+}
+.next .row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  margin-top: 32px;
+}
+.next .pick {
+  background: var(--surface-1);
+  padding: 24px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+}
+.next .pick .n { font-family: var(--display); font-size: 28px; letter-spacing: -0.02em; }
+.next .pick .ttl { font-size: 12px; color: var(--muted); margin-top: 4px; letter-spacing: 0.04em; }
+.next .pick .why { color: var(--dim); font-size: 11px; line-height: 1.6; margin-top: 16px; }
+
+footer {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 32px;
+  font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--dim);
+  display: flex; justify-content: space-between;
+  border-top: 1px solid var(--hairline);
+}
+
+/* utilities */
+.col { display: flex; flex-direction: column; gap: 12px; }
+.h-stack { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.kbd {
+  background: var(--surface-2); color: var(--muted);
+  padding: 1px 6px; border-radius: 2px;
+  font-size: 10px;
+}
+.faint { color: var(--dim); }
+.dim { color: var(--muted); }
+.tnum { font-feature-settings: "tnum"; }
+.uc { text-transform: uppercase; letter-spacing: 0.12em; font-size: 10px; }
+
+@media (max-width: 900px) {
+  .dir-head { grid-template-columns: 64px 1fr; }
+  .dir-head .tag { grid-column: 2; justify-self: start; }
+  .b-numeral-row { grid-template-columns: 1fr; }
+  .b-numeral-row > div { border-right: 0; border-bottom: 1px solid var(--hairline); }
+  .intro .meta { grid-template-columns: repeat(2, 1fr); }
+  .next .row { grid-template-columns: 1fr; }
+  .row.r4, .row.r5, .row.r6 { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body data-screen-label="Design Directions">
+
+<!-- ====================== TOP NAV ====================== -->
+<nav class="topnav">
+  <div class="topnav-inner">
+    <span class="brand"><span class="dot"></span>basecamp</span>
+    <span class="nav-meta">design system / v0 / directions</span>
+    <span class="dirjump">
+      <a href="#dir-a"><span class="idx">A</span>TERMINAL</a>
+      <a href="#dir-b"><span class="idx">B</span>PASSPORT</a>
+      <a href="#dir-c"><span class="idx">C</span>BLOCK</a>
+    </span>
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <span class="sq"></span><span id="theme-label">DARK</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ====================== INTRO ====================== -->
+<section class="intro" data-screen-label="00 Intro">
+  <div class="label">basecamp / design system / phase 01 — directions</div>
+  <h1>Three ways to <em>build the room</em>.</h1>
+  <p>
+    The brief: a personal web app — landing, dashboard, widgets, blog — that reads as part terminal,
+    part editorial document. Below are three coherent directions that share the same foundation
+    (color tone, mono + heavy display pairing, hairline rules, near-mono palette with one pop) but
+    differ in density, accent, and motif. Pick one and I&rsquo;ll go deep: the full component
+    library, layouts, and the linked mocks.
+  </p>
+  <div class="meta">
+    <div><div class="k">Type</div><div class="v">JetBrains Mono / Arial Black</div></div>
+    <div><div class="k">Mode</div><div class="v">Dark + Light</div></div>
+    <div><div class="k">Radius</div><div class="v">2–4px</div></div>
+    <div><div class="k">Texture</div><div class="v">Subtle grain, blur surfaces</div></div>
+  </div>
+</section>
+
+<!-- ====================== DIRECTION A — TERMINAL / TICKER ====================== -->
+<section id="dir-a" class="dir dir-a" data-screen-label="A — Terminal/Ticker">
+  <header class="dir-head">
+    <div class="num">A</div>
+    <div>
+      <h2 class="ttl">TERMINAL / TICKER</h2>
+      <div class="sub">
+        Dense, data-forward, ticker-strip energy. Box-drawing characters as section markers.
+        Amber as the one signal color. Hairlines instead of borders. Built for shipping a dashboard
+        that feels like an instrument, not a website.
+      </div>
+    </div>
+    <div class="tag">SIGNAL: AMBER</div>
+  </header>
+
+  <!-- Ticker -->
+  <div class="ticker">
+    <span class="item up"><span class="k">UPTIME</span><span class="v">99.94</span></span>
+    <span class="item up"><span class="k">DEPLOYS/WK</span><span class="v">14</span></span>
+    <span class="item down"><span class="k">P95</span><span class="v">142MS</span></span>
+    <span class="item up"><span class="k">NOTES</span><span class="v">+3</span></span>
+    <span class="item"><span class="k">LAST PUSH</span><span class="v">T-04:18</span></span>
+    <span class="item"><span class="k">REGION</span><span class="v">SFO / EWR</span></span>
+  </div>
+
+  <!-- Foundations -->
+  <div class="sec">
+    <div class="sec-head"><span class="num">01</span><span class="name">FOUNDATIONS / COLOR</span></div>
+    <div class="row r6">
+      <div class="swatch swatch-a-bg"><span class="nm">BG</span><span class="hex">#0B0D0C</span></div>
+      <div class="swatch swatch-a-s1"><span class="nm">SURFACE 1</span><span class="hex">#111413</span></div>
+      <div class="swatch swatch-a-s2"><span class="nm">SURFACE 2</span><span class="hex">#181C1A</span></div>
+      <div class="swatch swatch-a-s3"><span class="nm">SURFACE 3</span><span class="hex">#20251F</span></div>
+      <div class="swatch swatch-a-text"><span class="nm">TEXT</span><span class="hex">#E6EBE8</span></div>
+      <div class="swatch swatch-a-acc"><span class="nm">ACC / AMBER</span><span class="hex">#D4A44B</span></div>
+    </div>
+  </div>
+
+  <!-- Type -->
+  <div class="sec">
+    <div class="sec-head"><span class="num">02</span><span class="name">FOUNDATIONS / TYPE</span></div>
+    <div class="row r2">
+      <div class="tile">
+        <div class="corner">DISPLAY · ARIAL BLACK</div>
+        <div style="font-family: var(--display); font-size: 64px; line-height: 0.92; letter-spacing: -0.025em;">
+          BUILD<br/>THE ROOM.
+        </div>
+        <div class="uc faint" style="margin-top:16px">96/88/64/40 — letter-spacing -0.025em</div>
+      </div>
+      <div class="tile">
+        <div class="corner">UI · JETBRAINS MONO</div>
+        <div style="font-family: var(--mono); font-size: 13px; line-height: 1.55; max-width: 38ch;">
+          <span class="faint">// the room is a place to think.</span><br/>
+          Notes, calendars, charts, light apps. Shipped iteratively.<br/>
+          <span style="color: var(--acc-a)">▸</span> 13/14/16 body · 10/11 micro · weight 300–700
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI tiles -->
+  <div class="sec">
+    <div class="sec-head"><span class="num">03</span><span class="name">STATS / KPI TILES</span></div>
+    <div class="row r4">
+      <div class="kpi-a">
+        <div class="label">VISITORS / 7D</div>
+        <div class="value tnum">12,840</div>
+        <svg class="spark spark-svg" viewBox="0 0 100 24" preserveAspectRatio="none">
+          <path class="area" d="M0,18 L8,16 L16,17 L24,12 L32,14 L40,9 L48,11 L56,6 L64,8 L72,4 L80,7 L88,3 L96,5 L100,4 L100,24 L0,24 Z"/>
+          <path class="line" d="M0,18 L8,16 L16,17 L24,12 L32,14 L40,9 L48,11 L56,6 L64,8 L72,4 L80,7 L88,3 L96,5 L100,4"/>
+        </svg>
+        <div class="meta"><span>VS PRIOR</span><span class="delta">+18.4%</span></div>
+      </div>
+      <div class="kpi-a">
+        <div class="label">POSTS PUBLISHED</div>
+        <div class="value tnum">047</div>
+        <svg class="spark spark-svg" viewBox="0 0 100 24" preserveAspectRatio="none">
+          <path class="line" d="M0,12 L20,14 L40,11 L60,15 L80,9 L100,12"/>
+        </svg>
+        <div class="meta"><span>YTD</span><span class="delta">+12</span></div>
+      </div>
+      <div class="kpi-a">
+        <div class="label">AVG READ TIME</div>
+        <div class="value tnum">4:18</div>
+        <svg class="spark spark-svg" viewBox="0 0 100 24" preserveAspectRatio="none">
+          <path class="line" d="M0,15 L15,12 L30,14 L45,8 L60,11 L75,7 L90,9 L100,6"/>
+        </svg>
+        <div class="meta"><span>P50</span><span class="delta">+0:32</span></div>
+      </div>
+      <div class="kpi-a">
+        <div class="label">UPTIME / 30D</div>
+        <div class="value tnum">99.94<span style="font-size: 18px; color: var(--muted)">%</span></div>
+        <svg class="spark spark-svg" viewBox="0 0 100 24" preserveAspectRatio="none">
+          <path class="line" d="M0,4 L20,5 L40,4 L60,6 L80,3 L100,5"/>
+        </svg>
+        <div class="meta"><span>SLA</span><span class="delta">+0.08</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Components -->
+  <div class="sec">
+    <div class="sec-head"><span class="num">04</span><span class="name">COMPONENTS / SAMPLES</span></div>
+    <div class="row r2">
+      <div class="tile">
+        <div class="corner">BUTTONS</div>
+        <div class="h-stack" style="margin-top: 8px;">
+          <button class="btn btn-primary">DEPLOY<span class="ks">⏎</span></button>
+          <button class="btn btn-secondary">REVIEW</button>
+          <button class="btn btn-ghost">CANCEL</button>
+          <button class="btn btn-icon btn-secondary">▸</button>
+          <button class="btn btn-destructive">DESTROY</button>
+        </div>
+        <div class="h-stack" style="margin-top: 14px;">
+          <span class="badge"><span class="dot" style="background: var(--acc-a)"></span>LIVE</span>
+          <span class="badge">DRAFT</span>
+          <span class="badge">v0.3.1</span>
+          <span class="badge">EWR</span>
+        </div>
+      </div>
+
+      <div class="tile">
+        <div class="corner">INPUTS / SEG</div>
+        <div class="col">
+          <div class="field"><label>SEARCH</label>
+            <input class="input" placeholder="grep notes / posts / files…" />
+          </div>
+          <div class="h-stack">
+            <div class="seg">
+              <button class="on">DAY</button>
+              <button>WEEK</button>
+              <button>MO</button>
+              <button>YR</button>
+            </div>
+            <div class="toggle on dir-a-toggle" onclick="this.classList.toggle('on')"></div>
+            <span class="faint uc">LIVE TAIL</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="sec">
+    <div class="sec-head"><span class="num">05</span><span class="name">DATA / RECENT</span></div>
+    <div style="background: var(--surface-1); border-radius: var(--r-xs); overflow: hidden;">
+      <table class="tbl">
+        <thead>
+          <tr><th style="width:50px">#</th><th>EVENT</th><th>WHERE</th><th>TAG</th><th class="num">VALUE</th><th class="num">T</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="faint tnum">001</td><td>post.published</td><td>/log/the-room</td><td><span class="tag live">LIVE</span></td><td class="num tnum">+1</td><td class="num faint tnum">04:12</td></tr>
+          <tr><td class="faint tnum">002</td><td>deploy.commit</td><td>main · a72f01</td><td><span class="tag">DEPLOY</span></td><td class="num tnum">042</td><td class="num faint tnum">12:48</td></tr>
+          <tr><td class="faint tnum">003</td><td>note.created</td><td>/notes/2026-05</td><td><span class="tag">NOTE</span></td><td class="num tnum">+1</td><td class="num faint tnum">1:14:08</td></tr>
+          <tr><td class="faint tnum">004</td><td>widget.heartbeat</td><td>/widgets/now-playing</td><td><span class="tag">WIDGET</span></td><td class="num tnum">OK</td><td class="num faint tnum">2:01:33</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Motifs -->
+  <div class="sec">
+    <div class="sec-head"><span class="num">06</span><span class="name">MOTIFS / BOX-DRAWING</span></div>
+    <div class="motifs">
+      <div class="motif acc">▮<span class="lbl">SECTION</span></div>
+      <div class="motif">━<span class="lbl">RULE</span></div>
+      <div class="motif">▸<span class="lbl">CHEVRON</span></div>
+      <div class="motif">┐<span class="lbl">CORNER</span></div>
+      <div class="motif">▲<span class="lbl">UP</span></div>
+      <div class="motif">▼<span class="lbl">DOWN</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== DIRECTION B — PASSPORT ====================== -->
+<section id="dir-b" class="dir dir-b" data-screen-label="B — Passport">
+  <header class="dir-head">
+    <div class="num">B</div>
+    <div>
+      <h2 class="ttl">PASSPORT</h2>
+      <div class="sub">
+        Editorial document. Oversize numerals, thin double rules, stamp/tick details, generous
+        breathing room. Muted document red as accent. Slower, more deliberate. Feels official —
+        like the room has a serial number.
+      </div>
+    </div>
+    <div class="tag">SIGNAL: PASSPORT RED</div>
+  </header>
+
+  <!-- Big numerals row -->
+  <div class="b-numeral-row">
+    <div>
+      <div class="lbl">SECTION 01 — IDENTITY</div>
+      <div class="num">B<em>·</em>01</div>
+      <div class="desc">Document-grade hierarchy. Oversize headings, hairline dividers, official tone.</div>
+    </div>
+    <div>
+      <div class="lbl">SECTION 02 — MARKS</div>
+      <div class="num">26<em>/</em>52</div>
+      <div class="desc">Wayfinding numerals carry the visual weight. The accent is reserved.</div>
+    </div>
+    <div>
+      <div class="lbl">SECTION 03 — STAMP</div>
+      <div class="num"><em>✦</em>BCMP</div>
+      <div class="desc">Corner ticks, circular seals, signed-and-dated micro-meta.</div>
+    </div>
+  </div>
+
+  <!-- Foundations -->
+  <div class="sec">
+    <div class="sec-head"><span class="num">01</span><span class="name">FOUNDATIONS / COLOR</span></div>
+    <div class="row r6">
+      <div class="swatch swatch-b-bg"><span class="nm">BG</span><span class="hex">#0B0D0C</span></div>
+      <div class="swatch swatch-b-s1"><span class="nm">SURFACE 1</span><span class="hex">#111413</span></div>
+      <div class="swatch swatch-b-s2"><span class="nm">SURFACE 2</span><span class="hex">#181C1A</span></div>
+      <div class="swatch swatch-b-s3"><span class="nm">SURFACE 3</span><span class="hex">#20251F</span></div>
+      <div class="swatch swatch-b-text"><span class="nm">TEXT</span><span class="hex">#E6EBE8</span></div>
+      <div class="swatch swatch-b-acc"><span class="nm">ACC / RED</span><span class="hex">#B14439</span></div>
+    </div>
+  </div>
+
+  <!-- Type specimen -->
+  <div class="sec">
+    <div class="sec-head"><span class="num">02</span><span class="name">FOUNDATIONS / TYPE</span></div>
+    <div class="row r2">
+      <div class="tile" style="padding: 32px;">
+        <div class="corner">DISPLAY · ARIAL BLACK · -0.03</div>
+        <div style="font-family: var(--display); font-size: 88px; line-height: 0.88; letter-spacing: -0.03em;">
+          THE<br/>ROOM.
+        </div>
+        <div class="uc faint" style="margin-top:20px">SECTION HEADERS / 56–96 / -0.025 to -0.035</div>
+      </div>
+      <div class="tile" style="padding: 32px;">
+        <div class="corner">UI · JETBRAINS MONO</div>
+        <div style="font-family: var(--mono); font-size: 13px; line-height: 1.7; max-width: 38ch;">
+          <span class="faint">ISSUED · BCMP-26 · MAY 2026</span><br/><br/>
+          Body sets at 13–14px with 1.6 leading. Labels are 10–11px uppercase tracked at 0.12–0.16em.
+          Long-form mode uses 16/1.7.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stamped card / featured -->
+  <div class="sec">
+    <div class="sec-head"><span class="num">03</span><span class="name">CARDS / DOCUMENTS</span></div>
+    <div class="row r2">
+      <div class="stamp-card">
+        <div class="seal"><div><div class="yr">26</div>BCMP<br/>SFO</div></div>
+        <div class="seq">ENTRY · No. 0142 · MAY 24, 2026</div>
+        <div class="h">A new way to read.</div>
+        <div class="body">Long-form essays sit inside a document frame. Corner ticks, a circular seal,
+          and a date-stamped serial give every post the gravity of something filed, not just published.</div>
+      </div>
+      <div class="stamp-card">
+        <div class="seal" style="border-color: var(--text); color: var(--text)"><div><div class="yr">v3</div>WIDGET<br/>NOW</div></div>
+        <div class="seq">WIDGET · No. 0007 · NOW PLAYING</div>
+        <div class="h">Things in motion.</div>
+        <div class="body">Widgets are signed objects. Each one carries a stamp identifying its version,
+          origin, and last issue date. The room is curated, not crowded.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Components -->
+  <div class="sec">
+    <div class="sec-head"><span class="num">04</span><span class="name">COMPONENTS / SAMPLES</span></div>
+    <div class="row r2">
+      <div class="tile">
+        <div class="corner">BUTTONS / BADGES</div>
+        <div class="h-stack" style="margin-top: 8px;">
+          <button class="btn btn-primary">ISSUE</button>
+          <button class="btn btn-secondary">REVIEW</button>
+          <button class="btn btn-ghost">DISMISS</button>
+          <button class="btn btn-destructive">REVOKE</button>
+        </div>
+        <div class="h-stack" style="margin-top: 16px;">
+          <span class="badge acc"><span class="dot" style="background: #fff"></span>STAMPED</span>
+          <span class="badge">DRAFT</span>
+          <span class="badge">No. 0142</span>
+          <span class="badge">2026.05.24</span>
+        </div>
+      </div>
+      <div class="tile">
+        <div class="corner">INPUTS / CONTROLS</div>
+        <div class="col">
+          <div class="field"><label>SUBJECT — REQUIRED</label>
+            <input class="input" placeholder="Title of entry…" />
+          </div>
+          <div class="h-stack">
+            <label class="check on" onclick="this.classList.toggle('on')"><span class="box"></span>PUBLIC</label>
+            <label class="check" onclick="this.classList.toggle('on')"><span class="box"></span>SIGNED</label>
+            <label class="check on" onclick="this.classList.toggle('on')"><span class="box"></span>DATED</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Motifs -->
+  <div class="sec">
+    <div class="sec-head"><span class="num">05</span><span class="name">MOTIFS / GEOMETRIC</span></div>
+    <div class="motifs">
+      <div class="motif acc">✦<span class="lbl">SEAL</span></div>
+      <div class="motif">◆<span class="lbl">MARK</span></div>
+      <div class="motif">◯<span class="lbl">STAMP</span></div>
+      <div class="motif">⌐<span class="lbl">TICK</span></div>
+      <div class="motif">No<span class="lbl">SERIAL</span></div>
+      <div class="motif">§<span class="lbl">CLAUSE</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== DIRECTION C — BLOCK / RETRO ====================== -->
+<section id="dir-c" class="dir dir-c" data-screen-label="C — Block/Retro">
+  <header class="dir-head">
+    <div class="num">C</div>
+    <div>
+      <h2 class="ttl">BLOCK / RETRO</h2>
+      <div class="sub">
+        Heaviest texture, frosted blur surfaces, block-character motifs (▰▱░▒▓█), acid-lime pop.
+        Pixel-flavored details on otherwise polished components. Most playful, most personal —
+        leans into the retro-modern note from the brief.
+      </div>
+    </div>
+    <div class="tag">SIGNAL: ACID LIME</div>
+  </header>
+
+  <!-- Frosted hero strip -->
+  <div class="row r3" style="margin-bottom: 40px;">
+    <div class="frost" style="grid-column: span 2;">
+      <span class="blockmark">▰▰▰▱ NOW</span>
+      <h3 class="h">The room is on, and you&rsquo;re inside it.</h3>
+      <p>Frosted surfaces sit over a grain-textured base. Each block of UI feels physical —
+        a piece of glass on a stained desk. Acid lime appears once, for the thing that matters.</p>
+      <div class="h-stack" style="margin-top: 20px;">
+        <button class="btn btn-primary">▸ ENTER</button>
+        <button class="btn btn-secondary">TOUR</button>
+      </div>
+    </div>
+    <div class="frost" style="display:flex; flex-direction: column; gap: 16px;">
+      <span class="blockmark">░▒▓ STATUS</span>
+      <div style="font-family: var(--display); font-size: 36px; line-height: 1; letter-spacing: -0.02em;">ONLINE</div>
+      <div class="faint uc" style="margin-top: -4px;">▰▰▰▰▰▰▰▱ 88%</div>
+      <div class="h-stack" style="margin-top: auto;">
+        <span class="pill acc">▰ LIVE</span>
+        <span class="pill"><span class="ac">●</span> v0.3.1</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Foundations -->
+  <div class="sec">
+    <div class="sec-head"><span class="num">01</span><span class="name">FOUNDATIONS / COLOR</span></div>
+    <div class="row r6">
+      <div class="swatch swatch-c-bg"><span class="nm">BG</span><span class="hex">#0B0D0C</span></div>
+      <div class="swatch swatch-c-s1"><span class="nm">SURFACE 1</span><span class="hex">#111413</span></div>
+      <div class="swatch swatch-c-s2"><span class="nm">SURFACE 2</span><span class="hex">#181C1A</span></div>
+      <div class="swatch swatch-c-s3"><span class="nm">SURFACE 3</span><span class="hex">#20251F</span></div>
+      <div class="swatch swatch-c-text"><span class="nm">TEXT</span><span class="hex">#E6EBE8</span></div>
+      <div class="swatch swatch-c-acc"><span class="nm">ACC / LIME</span><span class="hex">#B8E63A</span></div>
+    </div>
+  </div>
+
+  <!-- Block strip motif -->
+  <div class="sec">
+    <div class="sec-head"><span class="num">02</span><span class="name">MOTIF / BLOCK CHARACTERS</span></div>
+    <div class="block-strip">
+      ▰▰▰▰▰▰▰▰▱▱▱▱<span class="dim"> ░░░▒▒▓▓██</span> ▰▱▰▱▰▱▰▱ <span class="dim">———</span> ▮▮▮▯
+    </div>
+    <div class="faint uc">Used as decorative section markers, status bars, progress fills, and headers.</div>
+  </div>
+
+  <!-- Type specimen -->
+  <div class="sec">
+    <div class="sec-head"><span class="num">03</span><span class="name">FOUNDATIONS / TYPE</span></div>
+    <div class="row r2">
+      <div class="tile">
+        <div class="corner">DISPLAY</div>
+        <div style="font-family: var(--display); font-size: 72px; line-height: 0.9; letter-spacing: -0.02em;">
+          IN THE<br/>ROOM<span style="color: var(--acc-c)">.</span>
+        </div>
+        <div class="uc faint" style="margin-top:16px">Arial Black · -0.02 · used sparingly, large</div>
+      </div>
+      <div class="tile">
+        <div class="corner">UI / DATA</div>
+        <div style="font-family: var(--mono); font-size: 13px; line-height: 1.6; max-width: 38ch;">
+          <span style="color: var(--acc-c)">▰▰</span> Block markers replace bullets.<br/>
+          <span style="color: var(--acc-c)">▰▰</span> Lime appears ~3% of pixels.<br/>
+          <span style="color: var(--acc-c)">▰▰</span> Everything else stays neutral.<br/>
+          <br/>
+          <span class="faint">// the dial is set to subtle.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Components -->
+  <div class="sec">
+    <div class="sec-head"><span class="num">04</span><span class="name">COMPONENTS / SAMPLES</span></div>
+    <div class="row r2">
+      <div class="tile">
+        <div class="corner">BUTTONS / PILLS</div>
+        <div class="h-stack" style="margin-top: 8px;">
+          <button class="btn btn-primary">▸ LAUNCH</button>
+          <button class="btn btn-secondary">PREVIEW</button>
+          <button class="btn btn-ghost">SKIP</button>
+          <button class="btn btn-icon btn-secondary">⌘</button>
+        </div>
+        <div class="h-stack" style="margin-top: 16px;">
+          <span class="pill acc">▰ DEPLOYED</span>
+          <span class="pill">▱ DRAFT</span>
+          <span class="pill">v0.3.1</span>
+          <span class="pill"><span class="ac">◆</span> WIDGET</span>
+        </div>
+      </div>
+      <div class="tile">
+        <div class="corner">INPUTS / TOGGLES</div>
+        <div class="col">
+          <div class="field"><label>COMMAND</label>
+            <input class="input" placeholder="▸ type to filter…" />
+          </div>
+          <div class="h-stack">
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            <span class="faint uc">GRAIN</span>
+            <div class="toggle" onclick="this.classList.toggle('on')"></div>
+            <span class="faint uc">BLUR</span>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            <span class="faint uc">SHIP</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Frosted widgets row -->
+  <div class="sec">
+    <div class="sec-head"><span class="num">05</span><span class="name">WIDGETS / FROSTED</span></div>
+    <div class="row r3">
+      <div class="frost" style="padding: 20px;">
+        <span class="blockmark">░▒▓ READING</span>
+        <div style="font-family: var(--mono); font-size: 12px; color: var(--muted); line-height: 1.6;">
+          <div style="color: var(--text);">▰ The Discipline of Things</div>
+          <div class="faint">— J. Jacobs · 64% ▰▰▰▰▰▰▱▱▱▱</div>
+        </div>
+      </div>
+      <div class="frost" style="padding: 20px;">
+        <span class="blockmark">▰▰▱ CAL</span>
+        <div style="font-family: var(--mono); font-size: 12px; color: var(--muted); line-height: 1.7;">
+          <div><span style="color: var(--acc-c)">●</span> 09:30 · standup</div>
+          <div><span class="faint">○</span> 14:00 · review</div>
+          <div><span class="faint">○</span> 18:30 · run</div>
+        </div>
+      </div>
+      <div class="frost" style="padding: 20px;">
+        <span class="blockmark">▓▓▒ NOW</span>
+        <div style="font-family: var(--display); font-size: 22px; letter-spacing: -0.02em; line-height: 1;">SHIPPING<br/><span style="color: var(--acc-c)">v0.3.1</span></div>
+        <div class="faint uc" style="margin-top: 8px;">build · 2m 14s</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Motifs -->
+  <div class="sec">
+    <div class="sec-head"><span class="num">06</span><span class="name">MOTIFS / BLOCK SET</span></div>
+    <div class="motifs">
+      <div class="motif acc">▰<span class="lbl">FILL</span></div>
+      <div class="motif">▱<span class="lbl">EMPTY</span></div>
+      <div class="motif">░<span class="lbl">LIGHT</span></div>
+      <div class="motif">▒<span class="lbl">MID</span></div>
+      <div class="motif">▓<span class="lbl">DARK</span></div>
+      <div class="motif">█<span class="lbl">SOLID</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== NEXT STEPS ====================== -->
+<section class="next" data-screen-label="Next">
+  <div class="sec-head"><span class="num">→</span><span class="name">NEXT</span></div>
+  <h2 style="font-family: var(--display); font-size: 56px; letter-spacing: -0.025em; line-height: 0.95; margin: 0 0 12px; max-width: 16ch;">
+    Pick a direction. I&rsquo;ll go deep on it.
+  </h2>
+  <p style="color: var(--muted); max-width: 56ch; margin: 0;">
+    Once you choose, I&rsquo;ll build out the full component library (every variant, every state) plus
+    three layout mocks: <em>marketing landing</em>, <em>app shell with sidebar</em>, and
+    <em>dashboard with stats + table</em>. Both light and dark for each.
+  </p>
+  <div class="row">
+    <a href="#dir-a" class="pick">
+      <div class="n">A</div>
+      <div class="ttl">TERMINAL / TICKER</div>
+      <div class="why">Choose if you want the dashboard to feel like an instrument. Densest. Amber pop.</div>
+    </a>
+    <a href="#dir-b" class="pick">
+      <div class="n">B</div>
+      <div class="ttl">PASSPORT</div>
+      <div class="why">Choose if the blog and editorial side matters most. Document gravity. Muted red.</div>
+    </a>
+    <a href="#dir-c" class="pick">
+      <div class="n">C</div>
+      <div class="ttl">BLOCK / RETRO</div>
+      <div class="why">Choose for personality. Frosted blur + block characters. Acid lime pop.</div>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <span>BASECAMP · DESIGN · v0</span>
+  <span>2026 · ALL DIRECTIONS, NO COMMIT</span>
+</footer>
+
+<script>
+  function toggleTheme() {
+    const html = document.documentElement;
+    const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    html.dataset.theme = next;
+    document.getElementById('theme-label').textContent = next.toUpperCase();
+    try { localStorage.setItem('basecamp-theme', next); } catch (e) {}
+  }
+  (function() {
+    try {
+      const saved = localStorage.getItem('basecamp-theme');
+      if (saved) {
+        document.documentElement.dataset.theme = saved;
+        document.getElementById('theme-label').textContent = saved.toUpperCase();
+      }
+    } catch (e) {}
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1641 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>basecamp — design system</title>
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="components.css" />
+<style>
+  /* Page-specific layout for design system docs */
+  .ds-layout {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    max-width: var(--max);
+    margin: 0 auto;
+    gap: 0;
+  }
+  .ds-toc {
+    position: sticky;
+    top: 64px;
+    align-self: start;
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+    padding: 32px 16px 32px 32px;
+    font-size: 11px;
+  }
+  .ds-toc .grp {
+    font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--dim);
+    padding: 12px 0 6px;
+    margin-top: 8px;
+    border-top: 1px solid var(--hairline);
+  }
+  .ds-toc .grp:first-child { border-top: 0; margin-top: 0; }
+  .ds-toc a {
+    display: flex; align-items: baseline; gap: 10px;
+    padding: 5px 0;
+    color: var(--muted);
+    text-decoration: none;
+    border-radius: var(--r-xs);
+  }
+  .ds-toc a .n {
+    color: var(--dim);
+    font-feature-settings: "tnum";
+    font-size: 10px;
+    min-width: 22px;
+  }
+  .ds-toc a:hover { color: var(--text); }
+  .ds-toc a.active { color: var(--acc); }
+  .ds-toc a.active .n { color: var(--acc); }
+
+  .ds-main {
+    padding: 48px 48px 120px 32px;
+    min-width: 0;
+  }
+  .ds-hero {
+    padding: 32px 0 48px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 24px;
+  }
+  .ds-hero .eyebrow { color: var(--dim); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 20px; display: flex; gap: 12px; align-items: center;}
+  .ds-hero .eyebrow .acc { color: var(--acc); }
+  .ds-hero h1 {
+    font-family: var(--display);
+    font-size: clamp(48px, 6.4vw, 88px);
+    letter-spacing: -0.03em;
+    line-height: 0.92;
+    margin: 0 0 24px;
+    max-width: 16ch;
+  }
+  .ds-hero h1 em { font-style: normal; color: var(--acc); }
+  .ds-hero p { color: var(--muted); font-size: 14px; line-height: 1.6; max-width: 60ch; margin: 0;}
+  .ds-hero .meta {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    margin-top: 40px;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .ds-hero .meta > div {
+    padding: 14px 16px 14px 0;
+    border-right: 1px solid var(--hairline);
+    font-size: 11px;
+  }
+  .ds-hero .meta > div:last-child { border-right: 0; }
+  .ds-hero .meta .k { color: var(--dim); text-transform: uppercase; font-size: 9px; letter-spacing: 0.16em; margin-bottom: 6px; }
+  .ds-hero .meta .v { color: var(--text); }
+
+  /* Section wrapper inside docs */
+  section.s {
+    scroll-margin-top: 72px;
+    margin-top: var(--sp-8);
+    padding-top: 8px;
+  }
+  section.s .s-head {
+    display: grid;
+    grid-template-columns: 64px 1fr auto;
+    gap: 24px;
+    align-items: baseline;
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--rule);
+  }
+  section.s .s-head .n {
+    font-family: var(--display); font-size: 36px; letter-spacing: -0.03em; line-height: 0.9;
+  }
+  section.s .s-head .t {
+    font-family: var(--display); font-size: 28px; letter-spacing: -0.02em;
+    line-height: 1;
+    margin: 0;
+  }
+  section.s .s-head .d {
+    color: var(--muted); font-size: 12px; margin-top: 6px; line-height: 1.55; max-width: 60ch;
+  }
+  section.s .s-head .tag {
+    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim);
+    padding: 4px 8px; background: var(--surface-2); border-radius: var(--r-xs);
+  }
+
+  /* Demo plate */
+  .plate {
+    background: var(--surface-1);
+    border-radius: var(--r-sm);
+    position: relative;
+    overflow: hidden;
+  }
+  .plate .plate-head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--hairline);
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--dim);
+  }
+  .plate .plate-head .n { color: var(--acc); }
+  .plate .plate-body {
+    padding: 28px;
+    display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+    min-height: 96px;
+  }
+  .plate .plate-body.col { flex-direction: column; align-items: stretch; }
+  .plate .plate-body.dense { gap: 8px; }
+  .plate .plate-body.center { justify-content: center; }
+
+  /* Color swatches */
+  .swatch {
+    display: flex; flex-direction: column;
+    height: 96px;
+    padding: 10px 12px;
+    justify-content: space-between;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    border-radius: var(--r-xs);
+  }
+  .swatch .nm { text-transform: uppercase; opacity: 0.9; }
+  .swatch .hex { font-feature-settings: "tnum"; }
+  .sw-bg     { background: var(--bg);       color: var(--text); box-shadow: inset 0 0 0 1px var(--hairline);}
+  .sw-s0     { background: var(--surface-0); color: var(--text); }
+  .sw-s1     { background: var(--surface-1); color: var(--text); }
+  .sw-s2     { background: var(--surface-2); color: var(--text); }
+  .sw-s3     { background: var(--surface-3); color: var(--text); }
+  .sw-s4     { background: var(--surface-4); color: var(--text); }
+  .sw-text   { background: var(--text);     color: var(--bg);   }
+  .sw-muted  { background: var(--muted);    color: var(--bg);   }
+  .sw-dim    { background: var(--dim);      color: var(--bg);   }
+  .sw-acc    { background: var(--acc);      color: var(--acc-on); }
+  .sw-acc-s  { background: var(--acc-soft); color: var(--acc); }
+  .sw-acc-2  { background: var(--acc-2);    color: var(--acc-2-on); }
+  .sw-danger { background: var(--danger);   color: var(--danger-on); }
+  .sw-warn   { background: var(--warn);     color: var(--warn-on); }
+  .sw-info   { background: var(--info);     color: var(--info-on); }
+  .sw-success { background: var(--success); color: var(--success-on); }
+  .sw-faint  { background: var(--faint);    color: var(--bg); }
+  .sw-hairline {
+    background: var(--surface-0);
+    color: var(--text);
+    position: relative;
+    overflow: hidden;
+  }
+  .sw-hairline::after {
+    content: '';
+    position: absolute; left: 12px; right: 12px; top: 50%;
+    height: 1px; background: var(--rule);
+  }
+  .sw-hairline::before {
+    content: '';
+    position: absolute; left: 12px; right: 12px; top: calc(50% + 12px);
+    height: 1px; background: var(--hairline);
+  }
+
+  /* Type specimen */
+  .type-row {
+    display: grid;
+    grid-template-columns: 140px 1fr 120px;
+    gap: 24px;
+    align-items: baseline;
+    padding: 14px 0;
+    border-top: 1px solid var(--hairline);
+  }
+  .type-row:first-of-type { border-top: 0; }
+  .type-row .lbl { color: var(--dim); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; }
+  .type-row .specimen { color: var(--text); }
+  .type-row .meta { color: var(--dim); font-size: 10px; text-align: right; letter-spacing: 0.08em;}
+
+  /* Spacing visualizer */
+  .sp-bar {
+    background: var(--surface-2);
+    height: 32px;
+    border-radius: var(--r-xs);
+    display: flex; align-items: center;
+    color: var(--text);
+    font-size: 11px;
+    padding: 0 12px;
+  }
+  .sp-line { background: var(--acc); height: 8px; border-radius: var(--r-xs); }
+
+  /* Radii visualizer */
+  .radius-tile {
+    background: var(--surface-2);
+    height: 64px;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .radius-tile .acc { color: var(--acc); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; }
+
+  /* Side TOC active dot */
+  .sym {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--acc);
+    user-select: none;
+  }
+
+  /* Modal demo backdrop */
+  .modal-demo {
+    background: var(--bg);
+    padding: 32px;
+    border-radius: var(--r-sm);
+    display: grid; place-items: center;
+    min-height: 240px;
+    position: relative;
+    box-shadow: inset 0 0 0 1px var(--hairline);
+  }
+
+  /* Layouts link cards */
+  .layout-links {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 24px;
+  }
+  .layout-links a {
+    background: var(--surface-1);
+    padding: 24px;
+    border-radius: var(--r-sm);
+    text-decoration: none;
+    color: var(--text);
+    transition: background var(--dur-fast);
+    position: relative;
+    overflow: hidden;
+  }
+  .layout-links a:hover { background: var(--surface-2); }
+  .layout-links a::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 32px; height: 3px; background: var(--acc);
+  }
+  .layout-links a .n {
+    font-family: var(--display); font-size: 36px; letter-spacing: -0.025em; line-height: 0.95;
+    margin-bottom: 16px;
+  }
+  .layout-links a .t { font-size: 12px; font-weight: 500; }
+  .layout-links a .d { color: var(--dim); font-size: 11px; margin-top: 4px; line-height: 1.55; }
+  .layout-links a .arr { position: absolute; top: 20px; right: 24px; color: var(--acc); font-family: var(--display); }
+  @media (max-width: 800px) { .layout-links { grid-template-columns: 1fr; } }
+
+  @media (max-width: 1024px) {
+    .ds-toc { display: none; }
+    .ds-layout { grid-template-columns: 1fr; }
+    .ds-main { padding: 32px 24px 80px; }
+  }
+</style>
+</head>
+<body data-screen-label="Design System">
+
+<!-- ============== TOP NAV ============== -->
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a class="brand" href="index.html"><span class="block"></span>basecamp <small>v0.1</small></a>
+    <span class="nav-meta">design system · direction C · block / retro</span>
+    <span class="nav-links">
+      <a href="index.html"><span class="idx">/</span>HOME</a>
+      <a href="Design System.html" class="active"><span class="idx">▰</span>SYSTEM</a>
+      <a href="Marketing Landing.html"><span class="idx">→</span>LANDING</a>
+      <a href="App Shell.html"><span class="idx">→</span>APP</a>
+      <a href="Dashboard.html"><span class="idx">→</span>DASH</a>
+    </span>
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <span class="sq"></span><span id="theme-label">DARK</span>
+    </button>
+  </div>
+</nav>
+
+<div class="ds-layout">
+  <!-- ============== SIDE TOC ============== -->
+  <aside class="ds-toc">
+    <div class="grp">▰▰ FOUNDATIONS</div>
+    <a href="#color"><span class="n">01</span>Color</a>
+    <a href="#type"><span class="n">02</span>Type</a>
+    <a href="#spacing"><span class="n">03</span>Spacing &amp; Radii</a>
+    <a href="#motifs"><span class="n">04</span>Motifs</a>
+
+    <div class="grp">▰▱ ELEMENTS</div>
+    <a href="#buttons"><span class="n">05</span>Buttons</a>
+    <a href="#inputs"><span class="n">06</span>Inputs</a>
+    <a href="#select"><span class="n">07</span>Selects &amp; Combobox</a>
+    <a href="#choice"><span class="n">08</span>Checkbox / Radio / Switch</a>
+    <a href="#tabs"><span class="n">09</span>Tabs &amp; Segmented</a>
+    <a href="#badges"><span class="n">10</span>Badges &amp; Pills</a>
+    <a href="#avatars"><span class="n">11</span>Avatars</a>
+
+    <div class="grp">░▒ SURFACES</div>
+    <a href="#cards"><span class="n">12</span>Cards &amp; Panels</a>
+    <a href="#tables"><span class="n">13</span>Tables</a>
+    <a href="#alerts"><span class="n">14</span>Alerts &amp; Banners</a>
+    <a href="#popovers"><span class="n">15</span>Popovers &amp; Tooltips</a>
+    <a href="#modals"><span class="n">16</span>Modals &amp; Drawers</a>
+
+    <div class="grp">▓█ COMPLEX</div>
+    <a href="#progress"><span class="n">17</span>Progress / Loaders</a>
+    <a href="#charts"><span class="n">18</span>Charts</a>
+    <a href="#kpi"><span class="n">19</span>KPI Tiles</a>
+    <a href="#empty"><span class="n">20</span>Empty States</a>
+    <a href="#forms"><span class="n">21</span>Forms</a>
+    <a href="#nav"><span class="n">22</span>Nav / Sidebar</a>
+
+    <div class="grp">→ NEXT</div>
+    <a href="#layouts"><span class="n">23</span>Layouts</a>
+  </aside>
+
+  <!-- ============== MAIN ============== -->
+  <main class="ds-main">
+    <!-- HERO -->
+    <header class="ds-hero">
+      <div class="eyebrow">
+        <span class="acc">▰▰▰▱</span>
+        <span>BASECAMP / DESIGN SYSTEM / v0.1 / DIRECTION C — BLOCK · RETRO</span>
+      </div>
+      <h1>The room is <em>on</em>.</h1>
+      <p>
+        Every primitive for a landing, dashboard, widget, and blog. JetBrains Mono carries the UI;
+        Arial Black carries the moments. Surfaces shift by tone, not borders. Block characters
+        replace bullets. Acid lime appears once per screen, for the thing that matters.
+      </p>
+      <div class="meta">
+        <div><div class="k">Type</div><div class="v">JetBrains Mono / Arial Black</div></div>
+        <div><div class="k">Accent</div><div class="v">#6A76FB / Indigo + #C839C5 Magenta</div></div>
+        <div><div class="k">Radius</div><div class="v">2–4px (pills at 999)</div></div>
+        <div><div class="k">Mode</div><div class="v">Dark + Light</div></div>
+      </div>
+    </header>
+
+    <!-- ============== 01 · COLOR ============== -->
+    <section class="s" id="color">
+      <header class="s-head">
+        <div class="n">01</div>
+        <div>
+          <h2 class="t">COLOR</h2>
+          <div class="d">A cool green-tinted dark and a warm off-white light. Surface steps do the work of borders. One accent — acid lime — and three semantic signals (danger, warn, info) used sparingly.</div>
+        </div>
+        <div class="tag">12 TOKENS</div>
+      </header>
+
+      <div class="sec-head"><span class="num">A</span><span class="name">SURFACES — STEP UP, NOT OUTLINE</span></div>
+      <p class="faint uc" style="margin: -12px 0 16px;">Values shown for dark mode · light values appear in parentheses. Tokens swap automatically.</p>
+      <div class="row r6">
+        <div class="swatch sw-bg"><span class="nm">BG</span><span class="hex" data-hex-dark="#0A0A0B" data-hex-light="#FAFAFA">#0A0A0B</span></div>
+        <div class="swatch sw-s0"><span class="nm">SURFACE 0</span><span class="hex" data-hex-dark="#0E0E10" data-hex-light="#F4F4F5">#0E0E10</span></div>
+        <div class="swatch sw-s1"><span class="nm">SURFACE 1</span><span class="hex" data-hex-dark="#131316" data-hex-light="#EEEEF0">#131316</span></div>
+        <div class="swatch sw-s2"><span class="nm">SURFACE 2</span><span class="hex" data-hex-dark="#1A1A1E" data-hex-light="#E4E4E7">#1A1A1E</span></div>
+        <div class="swatch sw-s3"><span class="nm">SURFACE 3</span><span class="hex" data-hex-dark="#232328" data-hex-light="#D4D4D8">#232328</span></div>
+        <div class="swatch sw-s4"><span class="nm">SURFACE 4</span><span class="hex" data-hex-dark="#2D2D33" data-hex-light="#C2C2C6">#2D2D33</span></div>
+      </div>
+
+      <div class="sec-head" style="margin-top: 32px;"><span class="num">B</span><span class="name">FOREGROUND — INK STEPS</span></div>
+      <div class="row r5">
+        <div class="swatch sw-text"><span class="nm">TEXT</span><span class="hex" data-hex-dark="#EDEDEE" data-hex-light="#0A0A0B">#EDEDEE</span></div>
+        <div class="swatch sw-muted"><span class="nm">MUTED</span><span class="hex" data-hex-dark="#9A9AA1" data-hex-light="#4A4A51">#9A9AA1</span></div>
+        <div class="swatch sw-dim"><span class="nm">DIM</span><span class="hex" data-hex-dark="#6B6B72" data-hex-light="#74747B">#6B6B72</span></div>
+        <div class="swatch sw-faint"><span class="nm">FAINT</span><span class="hex" data-hex-dark="#4A4A51" data-hex-light="#A4A4AB">#4A4A51</span></div>
+        <div class="swatch sw-hairline"><span class="nm" style="position: relative; z-index: 1;">RULE / HAIRLINE</span><span class="hex" style="position: relative; z-index: 1;" data-hex-dark="rgba(237/.12 · .06)" data-hex-light="rgba(10/.14 · .06)">rgba(237/.12 · .06)</span></div>
+      </div>
+
+      <div class="sec-head" style="margin-top: 32px;"><span class="num">C</span><span class="name">SIGNALS — USE SPARINGLY</span></div>
+      <div class="row r3" style="margin-bottom: 8px;">
+        <div class="swatch sw-acc"><span class="nm">ACC · INDIGO</span><span class="hex">#6A76FB</span></div>
+        <div class="swatch sw-acc-s"><span class="nm">ACC SOFT</span><span class="hex" data-hex-dark="rgba(106,118,251/.16)" data-hex-light="rgba(106,118,251/.14)">rgba(106,118,251/.16)</span></div>
+        <div class="swatch sw-acc-2"><span class="nm">ACC-2 · MAGENTA</span><span class="hex">#C839C5</span></div>
+      </div>
+      <div class="row r4">
+        <div class="swatch sw-success"><span class="nm">SUCCESS</span><span class="hex" data-hex-dark="#67F86F" data-hex-light="#1D7A25">#67F86F</span></div>
+        <div class="swatch sw-warn"><span class="nm">WARN</span><span class="hex" data-hex-dark="#FFFA71" data-hex-light="#D97706">#FFFA71</span></div>
+        <div class="swatch sw-danger"><span class="nm">DANGER</span><span class="hex">#FD6F6B</span></div>
+        <div class="swatch sw-info"><span class="nm">INFO</span><span class="hex" data-hex-dark="#20C5C6" data-hex-light="#0E8A8B">#20C5C6</span></div>
+      </div>
+    </section>
+
+    <!-- ============== 02 · TYPE ============== -->
+    <section class="s" id="type">
+      <header class="s-head">
+        <div class="n">02</div>
+        <div>
+          <h2 class="t">TYPE</h2>
+          <div class="d">Two faces. JetBrains Mono does 95% of the work — labels, body, data, micro. Arial Black appears only at display sizes, tracked tight, used for moments.</div>
+        </div>
+        <div class="tag">2 FAMILIES</div>
+      </header>
+
+      <div class="plate">
+        <div class="plate-head"><span class="n">▰▰</span> DISPLAY · ARIAL BLACK · -0.03em</div>
+        <div class="plate-body col">
+          <div class="type-row">
+            <div class="lbl">DISPLAY XL</div>
+            <div class="specimen display" style="font-size: 88px;">In the room.</div>
+            <div class="meta">88 / 0.92 / -0.03</div>
+          </div>
+          <div class="type-row">
+            <div class="lbl">DISPLAY L</div>
+            <div class="specimen display" style="font-size: 64px;">Build something.</div>
+            <div class="meta">64 / 0.95 / -0.03</div>
+          </div>
+          <div class="type-row">
+            <div class="lbl">DISPLAY M</div>
+            <div class="specimen display" style="font-size: 40px;">A new entry.</div>
+            <div class="meta">40 / 1.0 / -0.025</div>
+          </div>
+          <div class="type-row">
+            <div class="lbl">HEADING</div>
+            <div class="specimen display" style="font-size: 24px;">Recent activity</div>
+            <div class="meta">24 / 1.1 / -0.02</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="plate" style="margin-top: 16px;">
+        <div class="plate-head"><span class="n">▱▱</span> UI · JETBRAINS MONO · 300–700</div>
+        <div class="plate-body col">
+          <div class="type-row">
+            <div class="lbl">BODY · 14</div>
+            <div class="specimen" style="font-size: 14px; line-height: 1.65;">The room is a place to think. Notes, calendars, charts, the slow work of writing — they all live here, in one quiet place.</div>
+            <div class="meta">14 / 1.65 / 400</div>
+          </div>
+          <div class="type-row">
+            <div class="lbl">BODY · 13</div>
+            <div class="specimen" style="font-size: 13px; line-height: 1.55;">Default body. The whole UI sits in JetBrains Mono at 13/1.55 with a 0.005em letter-spacing for warmth.</div>
+            <div class="meta">13 / 1.55 / 400</div>
+          </div>
+          <div class="type-row">
+            <div class="lbl">CAPTION · 12</div>
+            <div class="specimen" style="font-size: 12px; color: var(--muted);">For secondary text, table cells, metadata. Slightly muted.</div>
+            <div class="meta">12 / 1.55 / 400</div>
+          </div>
+          <div class="type-row">
+            <div class="lbl">MICRO · 10</div>
+            <div class="specimen uc" style="font-size: 10px;">UPPERCASE TRACKED LABELS · 0.12EM</div>
+            <div class="meta">10 / 1.0 / 500</div>
+          </div>
+          <div class="type-row">
+            <div class="lbl">MONO ITALIC</div>
+            <div class="specimen" style="font-size: 13px; font-style: italic; color: var(--dim);">// used for comments and asides only</div>
+            <div class="meta">13 / 1.55 / italic</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 03 · SPACING & RADII ============== -->
+    <section class="s" id="spacing">
+      <header class="s-head">
+        <div class="n">03</div>
+        <div>
+          <h2 class="t">SPACING &amp; RADII</h2>
+          <div class="d">A 4px scale with named tokens. Tight at the bottom (sp-1) for chips and micro-gaps, generous at the top (sp-9) for hero margins. Radii stay barely-there: 2-4px on everything except pills.</div>
+        </div>
+        <div class="tag">9 STEPS · 5 RADII</div>
+      </header>
+
+      <div class="row r2">
+        <div class="plate">
+          <div class="plate-head"><span class="n">▰</span> SPACING SCALE</div>
+          <div class="plate-body col" style="gap: 8px;">
+            <div class="sp-bar"><span style="width: 64px; color: var(--dim);">sp-1 / 4</span><div class="sp-line" style="width: 4px;"></div></div>
+            <div class="sp-bar"><span style="width: 64px; color: var(--dim);">sp-2 / 8</span><div class="sp-line" style="width: 8px;"></div></div>
+            <div class="sp-bar"><span style="width: 64px; color: var(--dim);">sp-3 / 12</span><div class="sp-line" style="width: 12px;"></div></div>
+            <div class="sp-bar"><span style="width: 64px; color: var(--dim);">sp-4 / 16</span><div class="sp-line" style="width: 16px;"></div></div>
+            <div class="sp-bar"><span style="width: 64px; color: var(--dim);">sp-5 / 24</span><div class="sp-line" style="width: 24px;"></div></div>
+            <div class="sp-bar"><span style="width: 64px; color: var(--dim);">sp-6 / 32</span><div class="sp-line" style="width: 32px;"></div></div>
+            <div class="sp-bar"><span style="width: 64px; color: var(--dim);">sp-7 / 48</span><div class="sp-line" style="width: 48px;"></div></div>
+            <div class="sp-bar"><span style="width: 64px; color: var(--dim);">sp-8 / 64</span><div class="sp-line" style="width: 64px;"></div></div>
+            <div class="sp-bar"><span style="width: 64px; color: var(--dim);">sp-9 / 96</span><div class="sp-line" style="width: 96px;"></div></div>
+          </div>
+        </div>
+
+        <div class="plate">
+          <div class="plate-head"><span class="n">▱</span> RADII</div>
+          <div class="plate-body col">
+            <div class="row r3">
+              <div class="radius-tile" style="border-radius: 0;"><span class="acc">R-0</span><span>0px</span></div>
+              <div class="radius-tile" style="border-radius: 2px;"><span class="acc">R-XS</span><span>2px</span></div>
+              <div class="radius-tile" style="border-radius: 3px;"><span class="acc">R-SM</span><span>3px</span></div>
+            </div>
+            <div class="row r2">
+              <div class="radius-tile" style="border-radius: 4px;"><span class="acc">R-MD</span><span>4px</span></div>
+              <div class="radius-tile" style="border-radius: 999px;"><span class="acc">R-PILL</span><span>999px</span></div>
+            </div>
+            <div class="faint uc">Rule of thumb · blocks 2-4px · pills/avatars only at 999.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 04 · MOTIFS ============== -->
+    <section class="s" id="motifs">
+      <header class="s-head">
+        <div class="n">04</div>
+        <div>
+          <h2 class="t">MOTIFS &amp; MARKS</h2>
+          <div class="d">The block-character set is the signature. Use as section markers, status indicators, progress fills, decorative headers. Always at low frequency — they punctuate, not pattern.</div>
+        </div>
+        <div class="tag">8 GLYPHS</div>
+      </header>
+      <div class="row r4">
+        <div class="plate">
+          <div class="plate-head"><span class="n">▰</span> SECTION MARKERS</div>
+          <div class="plate-body" style="font-family: var(--mono); font-size: 22px; color: var(--acc); letter-spacing: -0.05em; padding: 24px 28px;">
+            <span>▰▰▰▱</span>
+          </div>
+        </div>
+        <div class="plate">
+          <div class="plate-head"><span class="n">▱</span> STATUS BARS</div>
+          <div class="plate-body" style="font-family: var(--mono); font-size: 14px; color: var(--acc); letter-spacing: -0.05em; padding: 32px 28px;">
+            <span>▰▰▰▰▰▰▰▱<span style="color: var(--surface-3)">▱▱</span></span>
+          </div>
+        </div>
+        <div class="plate">
+          <div class="plate-head"><span class="n">░</span> DENSITY GLYPHS</div>
+          <div class="plate-body" style="font-family: var(--mono); font-size: 22px; color: var(--text); padding: 24px 28px;">
+            <span>░ ▒ ▓ █</span>
+          </div>
+        </div>
+        <div class="plate">
+          <div class="plate-head"><span class="n">▮</span> CURSORS</div>
+          <div class="plate-body" style="font-family: var(--mono); font-size: 22px; color: var(--acc); padding: 24px 28px;">
+            <span>▸ ▮ ◆ ●</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 05 · BUTTONS ============== -->
+    <section class="s" id="buttons">
+      <header class="s-head">
+        <div class="n">05</div>
+        <div>
+          <h2 class="t">BUTTONS</h2>
+          <div class="d">Five variants · three sizes · icon + kbd hints. Primary uses the accent with a subtle top-light gradient. Destructive uses the danger signal. Ghost and outline carry the weight of the rest.</div>
+        </div>
+        <div class="tag">5 VAR · 3 SIZE</div>
+      </header>
+
+      <div class="plate">
+        <div class="plate-head"><span class="n">▰</span> VARIANTS</div>
+        <div class="plate-body">
+          <button class="btn btn-primary">▸ LAUNCH<span class="ks">⌘↵</span></button>
+          <button class="btn btn-acc-2">▰ FEATURE</button>
+          <button class="btn btn-secondary">REVIEW</button>
+          <button class="btn btn-ghost">CANCEL</button>
+          <button class="btn btn-outline">CONNECT</button>
+          <button class="btn btn-destructive">DELETE</button>
+          <button class="btn btn-icon btn-secondary">⌘</button>
+          <button class="btn btn-icon btn-ghost">▾</button>
+          <button class="btn btn-primary is-disabled">DISABLED</button>
+        </div>
+      </div>
+
+      <div class="row r2" style="margin-top: 16px;">
+        <div class="plate">
+          <div class="plate-head"><span class="n">▰</span> SIZES</div>
+          <div class="plate-body">
+            <button class="btn btn-primary btn-sm">▸ SM</button>
+            <button class="btn btn-primary">▸ DEFAULT</button>
+            <button class="btn btn-primary btn-lg">▸ LARGE</button>
+          </div>
+        </div>
+        <div class="plate">
+          <div class="plate-head"><span class="n">▱</span> BUTTON GROUP</div>
+          <div class="plate-body">
+            <div class="btn-group">
+              <button class="btn active">DAY</button>
+              <button class="btn">WEEK</button>
+              <button class="btn">MO</button>
+              <button class="btn">YR</button>
+            </div>
+            <div class="btn-group">
+              <button class="btn btn-icon">◀</button>
+              <button class="btn btn-sm">JUN 2026</button>
+              <button class="btn btn-icon">▶</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 06 · INPUTS ============== -->
+    <section class="s" id="inputs">
+      <header class="s-head">
+        <div class="n">06</div>
+        <div>
+          <h2 class="t">INPUTS</h2>
+          <div class="d">All inputs sit on surface-2 with no visible border. Focus lifts them to surface-3 and stamps a 1px accent ring. Icons sit inside. Errors swap the ring for danger.</div>
+        </div>
+        <div class="tag">4 TYPES</div>
+      </header>
+
+      <div class="plate">
+        <div class="plate-head"><span class="n">▰</span> TEXT · SEARCH · PASSWORD</div>
+        <div class="plate-body col" style="max-width: 640px;">
+          <div class="field">
+            <label class="lbl">FULL NAME <span class="req">*</span></label>
+            <input class="input" placeholder="e.g. Hendrik Vromans" value="" />
+            <span class="hint">As it should appear on bylines.</span>
+          </div>
+
+          <div class="field">
+            <label class="lbl">SEARCH</label>
+            <div class="input-wrap">
+              <span class="icon-l">▸</span>
+              <input class="input" placeholder="grep notes / posts / files…" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="lbl">PASSWORD</label>
+            <div class="input-wrap">
+              <input class="input has-r" type="password" value="••••••••••••" />
+              <span class="icon-r" title="Show / hide">◉</span>
+            </div>
+            <span class="hint">14+ chars. Pasted from 1Password is fine.</span>
+          </div>
+
+          <div class="field">
+            <label class="lbl">EMAIL — ERROR STATE</label>
+            <input class="input error" value="not-an-email" />
+            <span class="err">▸ that doesn&rsquo;t look like an address.</span>
+          </div>
+
+          <div class="field">
+            <label class="lbl">NOTES</label>
+            <textarea class="textarea" placeholder="Tap to write. Markdown supported. ▰▰">// a draft, scribbled at 1:14am — three thoughts about the room.</textarea>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 07 · SELECT / COMBOBOX ============== -->
+    <section class="s" id="select">
+      <header class="s-head">
+        <div class="n">07</div>
+        <div>
+          <h2 class="t">SELECTS &amp; COMBOBOX</h2>
+          <div class="d">Native selects styled with a custom chevron. Dropdowns are popovers with grouped items, kbd hints, and a tick mark on the active item.</div>
+        </div>
+        <div class="tag">3 PATTERNS</div>
+      </header>
+
+      <div class="row r2">
+        <div class="plate">
+          <div class="plate-head"><span class="n">▰</span> NATIVE SELECT</div>
+          <div class="plate-body col">
+            <div class="field">
+              <label class="lbl">VISIBILITY</label>
+              <select class="select-native">
+                <option>Public — listed in feed</option>
+                <option>Unlisted — link only</option>
+                <option>Private — me only</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="lbl">TIMEZONE</label>
+              <select class="select-native">
+                <option>America / New York (UTC-04:00)</option>
+                <option>America / Los Angeles</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="plate">
+          <div class="plate-head"><span class="n">▱</span> DROPDOWN / MENU</div>
+          <div class="plate-body" style="align-items: flex-start;">
+            <div class="menu" style="position: static; max-width: 280px; width: 100%;">
+              <div class="grp-lbl">▰▱ ACTIONS</div>
+              <div class="item"><span class="ico">▸</span>Open in editor<span class="ks">⌘↵</span></div>
+              <div class="item"><span class="ico">↗</span>Open in new tab<span class="ks">⌘⇧↵</span></div>
+              <div class="item"><span class="ico">✱</span>Pin to dashboard</div>
+              <div class="sep"></div>
+              <div class="grp-lbl">SHARE</div>
+              <div class="item"><span class="ico">⌁</span>Copy link<span class="ks">⌘L</span></div>
+              <div class="item"><span class="ico">↦</span>Send to&hellip;</div>
+              <div class="sep"></div>
+              <div class="item danger"><span class="ico">✕</span>Delete<span class="ks">⌫</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="plate" style="margin-top: 16px;">
+        <div class="plate-head"><span class="n">░</span> COMBOBOX</div>
+        <div class="plate-body col" style="max-width: 480px;">
+          <div class="field">
+            <label class="lbl">TAG</label>
+            <div class="input-wrap">
+              <span class="icon-l">#</span>
+              <input class="input" placeholder="search or create…" value="essay" />
+            </div>
+          </div>
+          <div class="menu" style="position: static; max-width: 480px; width: 100%; margin-top: -10px;">
+            <div class="grp-lbl">▰ EXISTING</div>
+            <div class="item" style="background: var(--surface-2);"><span class="ico" style="color: var(--acc);">▸</span>essay<span class="ks">28 posts</span></div>
+            <div class="item"><span class="ico">#</span>essay/long-form<span class="ks">12</span></div>
+            <div class="item"><span class="ico">#</span>essay/note<span class="ks">9</span></div>
+            <div class="sep"></div>
+            <div class="item"><span class="ico" style="color: var(--acc);">+</span>Create &ldquo;essay/new&rdquo;<span class="ks">↵</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 08 · CHOICE ============== -->
+    <section class="s" id="choice">
+      <header class="s-head">
+        <div class="n">08</div>
+        <div>
+          <h2 class="t">CHECKBOX · RADIO · SWITCH</h2>
+          <div class="d">Three toggle primitives plus a toggle group (segmented). All swap to accent in their on-state with an inverted ink color on top.</div>
+        </div>
+        <div class="tag">4 PATTERNS</div>
+      </header>
+
+      <div class="row r2">
+        <div class="plate">
+          <div class="plate-head"><span class="n">▰</span> CHECKBOX</div>
+          <div class="plate-body col" style="gap: 12px;">
+            <label class="check on" onclick="this.classList.toggle('on')"><span class="box"></span>Public listing</label>
+            <label class="check on" onclick="this.classList.toggle('on')"><span class="box"></span>Comments allowed</label>
+            <label class="check" onclick="this.classList.toggle('on')"><span class="box"></span>Email subscribers</label>
+            <label class="check is-disabled"><span class="box"></span>RSS only (locked)</label>
+          </div>
+        </div>
+
+        <div class="plate">
+          <div class="plate-head"><span class="n">▱</span> RADIO</div>
+          <div class="plate-body col" style="gap: 12px;">
+            <label class="radio on" onclick="radioPick(this,'theme')"><span class="dot"></span>Dark — default</label>
+            <label class="radio"    onclick="radioPick(this,'theme')"><span class="dot"></span>Light — warm off-white</label>
+            <label class="radio"    onclick="radioPick(this,'theme')"><span class="dot"></span>System — follow OS</label>
+          </div>
+        </div>
+
+        <div class="plate">
+          <div class="plate-head"><span class="n">░</span> SWITCH</div>
+          <div class="plate-body col" style="gap: 14px;">
+            <div class="switch-row"><div class="switch on" onclick="this.classList.toggle('on')"></div>Show grain texture</div>
+            <div class="switch-row"><div class="switch on" onclick="this.classList.toggle('on')"></div>Frosted surfaces</div>
+            <div class="switch-row"><div class="switch" onclick="this.classList.toggle('on')"></div>Reduce motion</div>
+            <div class="switch-row"><div class="switch is-disabled"></div>Locked feature</div>
+          </div>
+        </div>
+
+        <div class="plate">
+          <div class="plate-head"><span class="n">▒</span> TOGGLE GROUP</div>
+          <div class="plate-body col">
+            <div class="toggle-group" onclick="tg(event)">
+              <button class="on">DAY</button>
+              <button>WEEK</button>
+              <button>MONTH</button>
+              <button>YEAR</button>
+            </div>
+            <div class="toggle-group" onclick="tg(event)">
+              <button>GRID</button>
+              <button class="on">LIST</button>
+              <button>CARDS</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 09 · TABS ============== -->
+    <section class="s" id="tabs">
+      <header class="s-head">
+        <div class="n">09</div>
+        <div>
+          <h2 class="t">TABS</h2>
+          <div class="d">Underlined tabs sit on the rule. Active gets a 2px accent line. Counts inline at dim weight.</div>
+        </div>
+        <div class="tag">1 PATTERN</div>
+      </header>
+
+      <div class="plate">
+        <div class="plate-head"><span class="n">▰</span> SECTION TABS</div>
+        <div class="plate-body col" style="align-items: stretch;">
+          <div class="tabs" onclick="tabs(event)">
+            <button class="on">Overview <span class="count">128</span></button>
+            <button>Posts <span class="count">47</span></button>
+            <button>Notes <span class="count">214</span></button>
+            <button>Widgets <span class="count">9</span></button>
+            <button>Settings</button>
+          </div>
+          <div style="padding: 24px 4px 4px; color: var(--muted); font-size: 12px;">
+            <span class="faint">// content for the active tab renders here.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 10 · BADGES / PILLS ============== -->
+    <section class="s" id="badges">
+      <header class="s-head">
+        <div class="n">10</div>
+        <div>
+          <h2 class="t">BADGES &amp; PILLS</h2>
+          <div class="d">Square badges for status — tracked, uppercase, micro. Round pills for tags and softer chips. Both come in default + signal colors.</div>
+        </div>
+        <div class="tag">2 SHAPES · 6 TONES</div>
+      </header>
+
+      <div class="row r2">
+        <div class="plate">
+          <div class="plate-head"><span class="n">▰</span> BADGES — STATUS</div>
+          <div class="plate-body">
+            <span class="badge"><span class="dot"></span>DRAFT</span>
+            <span class="badge acc"><span class="dot" style="background: var(--acc-on)"></span>LIVE</span>
+            <span class="badge acc-soft">v0.3.1</span>
+            <span class="badge acc-2">▰ FEATURED</span>
+            <span class="badge acc-2-soft">NEW</span>
+            <span class="badge success">SUCCESS</span>
+            <span class="badge danger">FAILED</span>
+            <span class="badge warn">PENDING</span>
+            <span class="badge info">QUEUED</span>
+            <span class="badge outline">EWR · 2026.05.24</span>
+          </div>
+        </div>
+
+        <div class="plate">
+          <div class="plate-head"><span class="n">▱</span> PILLS — TAGS</div>
+          <div class="plate-body">
+            <span class="pill"><span class="ac">#</span>essay</span>
+            <span class="pill"><span class="ac">#</span>code</span>
+            <span class="pill"><span class="ac">#</span>process</span>
+            <span class="pill acc">▰ LIVE</span>
+            <span class="pill acc-2">▰ FEATURED</span>
+            <span class="pill"><span class="ac">◆</span>widget</span>
+            <span class="pill">2026 <span class="x">✕</span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 11 · AVATARS ============== -->
+    <section class="s" id="avatars">
+      <header class="s-head">
+        <div class="n">11</div>
+        <div>
+          <h2 class="t">AVATARS</h2>
+          <div class="d">Initials by default, square radius matches the system. Stacks overlap with a bg-colored outline. Presence dot uses the accent.</div>
+        </div>
+        <div class="tag">4 SIZES</div>
+      </header>
+
+      <div class="plate">
+        <div class="plate-head"><span class="n">▰</span> SIZES &amp; STATES</div>
+        <div class="plate-body">
+          <span class="avatar sm">HV</span>
+          <span class="avatar">HV</span>
+          <span class="avatar lg">HV</span>
+          <span class="avatar xl">HV</span>
+          <span class="avatar round lg">HV<span class="presence"></span></span>
+          <span class="avatar acc lg">▰</span>
+          <span class="avatar-stack">
+            <span class="avatar">HV</span>
+            <span class="avatar">JC</span>
+            <span class="avatar">EL</span>
+            <span class="avatar" style="background: var(--surface-2); color: var(--dim);">+4</span>
+          </span>
+          <span class="user-pill"><span class="avatar sm">HV</span>hendrik.j.v<span class="faint" style="margin-left: 4px;">▰ online</span></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 12 · CARDS ============== -->
+    <section class="s" id="cards">
+      <header class="s-head">
+        <div class="n">12</div>
+        <div>
+          <h2 class="t">CARDS &amp; PANELS</h2>
+          <div class="d">Three card flavors: standard (surface-1 plate), frosted (semi-transparent + blur, for hero or widget moments), and block (sharp + accent top-bar).</div>
+        </div>
+        <div class="tag">3 VAR</div>
+      </header>
+
+      <div class="row r3">
+        <div class="card">
+          <div class="card-head">
+            <span class="mark">▰ NOTE</span>
+            <span class="badge outline">2026.05.24</span>
+          </div>
+          <div class="display" style="font-size: 22px; letter-spacing: -0.02em; margin-bottom: 8px;">On the discipline of things.</div>
+          <p style="color: var(--muted); font-size: 12px; margin: 0 0 20px; line-height: 1.6;">A short note on building the room — not as a portfolio site but as a place that runs.</p>
+          <div class="card-foot">
+            <span class="faint uc">3 MIN READ</span>
+            <button class="btn btn-sm btn-ghost">▸ OPEN</button>
+          </div>
+        </div>
+
+        <div class="frost">
+          <span class="blockmark">░▒▓ FROSTED</span>
+          <div class="h">Things in motion.</div>
+          <p>Frosted surfaces sit over the grain — perfect for hero widgets, modals, and the now-playing strip.</p>
+          <div class="h-stack" style="margin-top: 18px;">
+            <button class="btn btn-primary btn-sm">▸ ENTER</button>
+            <button class="btn btn-ghost btn-sm">TOUR</button>
+          </div>
+        </div>
+
+        <div class="block-card">
+          <div class="card-head">
+            <span class="mark">▱ BLOCK</span>
+          </div>
+          <div class="display" style="font-size: 22px; letter-spacing: -0.02em;">Shipping v0.3.1</div>
+          <p style="color: var(--muted); font-size: 12px; margin: 8px 0 20px; line-height: 1.6;">For build status, deploy logs, and other "hard" moments. Sharp corner, accent stripe up top.</p>
+          <div class="progress-blocks">▰▰▰▰▰▰▰<span class="empty">▱▱▱</span> <span style="color: var(--text); font-size: 11px; margin-left: 8px;">68%</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 13 · TABLES ============== -->
+    <section class="s" id="tables">
+      <header class="s-head">
+        <div class="n">13</div>
+        <div>
+          <h2 class="t">TABLES</h2>
+          <div class="d">Hairline row dividers, sticky thead in surface-0, tabular nums on numeric cells. Hover lifts to surface-2. Selected rows use accent-soft.</div>
+        </div>
+        <div class="tag">1 PATTERN</div>
+      </header>
+
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr>
+            <th style="width: 40px;">#</th>
+            <th>TITLE</th>
+            <th>TAG</th>
+            <th>STATUS</th>
+            <th class="num">VIEWS</th>
+            <th class="num">PUBLISHED</th>
+            <th style="width:32px;"></th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td class="idx">001</td>
+              <td>The discipline of things</td>
+              <td><span class="pill" style="padding: 2px 8px; font-size: 10px;"><span class="ac">#</span>essay</span></td>
+              <td><span class="badge acc">LIVE</span></td>
+              <td class="num tnum">12,840</td>
+              <td class="num tnum dim">MAY 24</td>
+              <td><button class="btn btn-icon btn-sm btn-ghost">⋯</button></td>
+            </tr>
+            <tr class="selected">
+              <td class="idx">002</td>
+              <td>How I built the room</td>
+              <td><span class="pill" style="padding: 2px 8px; font-size: 10px;"><span class="ac">#</span>process</span></td>
+              <td><span class="badge acc">LIVE</span></td>
+              <td class="num tnum">8,421</td>
+              <td class="num tnum dim">MAY 18</td>
+              <td><button class="btn btn-icon btn-sm btn-ghost">⋯</button></td>
+            </tr>
+            <tr>
+              <td class="idx">003</td>
+              <td>Calendar widget — v2</td>
+              <td><span class="pill" style="padding: 2px 8px; font-size: 10px;"><span class="ac">◆</span>widget</span></td>
+              <td><span class="badge">DRAFT</span></td>
+              <td class="num tnum dim">—</td>
+              <td class="num tnum dim">—</td>
+              <td><button class="btn btn-icon btn-sm btn-ghost">⋯</button></td>
+            </tr>
+            <tr>
+              <td class="idx">004</td>
+              <td>Notes on type</td>
+              <td><span class="pill" style="padding: 2px 8px; font-size: 10px;"><span class="ac">#</span>essay</span></td>
+              <td><span class="badge warn">SCHEDULED</span></td>
+              <td class="num tnum dim">—</td>
+              <td class="num tnum dim">MAY 28</td>
+              <td><button class="btn btn-icon btn-sm btn-ghost">⋯</button></td>
+            </tr>
+            <tr>
+              <td class="idx">005</td>
+              <td>Deploy a static site, slowly</td>
+              <td><span class="pill" style="padding: 2px 8px; font-size: 10px;"><span class="ac">#</span>code</span></td>
+              <td><span class="badge danger">FAILED</span></td>
+              <td class="num tnum">412</td>
+              <td class="num tnum dim">MAY 12</td>
+              <td><button class="btn btn-icon btn-sm btn-ghost">⋯</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============== 14 · ALERTS ============== -->
+    <section class="s" id="alerts">
+      <header class="s-head">
+        <div class="n">14</div>
+        <div>
+          <h2 class="t">ALERTS &amp; BANNERS</h2>
+          <div class="d">Inline alerts use a 3px accent stripe on the left and a single glyph. Banners stretch full-width and can be filled with the accent for the loudest case.</div>
+        </div>
+        <div class="tag">5 TONES</div>
+      </header>
+
+      <div class="plate">
+        <div class="plate-head"><span class="n">▰</span> INLINE ALERTS</div>
+        <div class="plate-body col">
+          <div class="alert success">
+            <span class="ico">▰</span>
+            <div class="body">
+              <div class="ttl">Build succeeded.</div>
+              <p class="msg">Deploy <code style="background: var(--surface-2); padding: 1px 6px; border-radius: 2px;">a72f01</code> shipped to production in 2m 14s. <a href="#" style="color: var(--acc);">View logs ↗</a></p>
+            </div>
+            <span class="x">✕</span>
+          </div>
+          <div class="alert info">
+            <span class="ico">◆</span>
+            <div class="body">
+              <div class="ttl">A new draft is auto-saving.</div>
+              <p class="msg">Your changes are being stored locally every 10s. They&rsquo;ll sync once you&rsquo;re back online.</p>
+            </div>
+            <span class="x">✕</span>
+          </div>
+          <div class="alert warn">
+            <span class="ico">◇</span>
+            <div class="body">
+              <div class="ttl">SSL cert renews in 7 days.</div>
+              <p class="msg">basecamp.so · we&rsquo;ll auto-renew at T-3, no action needed unless we ping you again.</p>
+            </div>
+          </div>
+          <div class="alert danger">
+            <span class="ico">✕</span>
+            <div class="body">
+              <div class="ttl">Deploy failed.</div>
+              <p class="msg">Build #441 errored at <code style="background: var(--surface-2); padding: 1px 6px; border-radius: 2px;">routes/notes.ts:42</code>. Type mismatch on <code style="background: var(--surface-2); padding: 1px 6px; border-radius: 2px;">slug</code>.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="plate" style="margin-top: 16px;">
+        <div class="plate-head"><span class="n">▱</span> FULL-WIDTH BANNERS</div>
+        <div class="plate-body col" style="padding: 0;">
+          <div class="banner"><span class="mk acc" style="color: var(--acc);">▰ HEADS UP</span><span>New release · v0.3.1 ships with widget themes.</span><a href="#" style="margin-left: auto; color: var(--acc); text-decoration: none;">READ NOTES →</a></div>
+          <div class="banner acc"><span class="mk">▰▰ LIVE</span><span>You&rsquo;re viewing the design system in <strong>light mode</strong> for the first time — say hi.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 15 · POPOVERS / TOOLTIPS ============== -->
+    <section class="s" id="popovers">
+      <header class="s-head">
+        <div class="n">15</div>
+        <div>
+          <h2 class="t">POPOVERS &amp; TOOLTIPS</h2>
+          <div class="d">Floating surfaces sit on surface-1 with a 1px hairline + shadow. Tooltips use surface-3 and stay tight.</div>
+        </div>
+        <div class="tag">2 PATTERNS</div>
+      </header>
+
+      <div class="row r2">
+        <div class="plate">
+          <div class="plate-head"><span class="n">▰</span> POPOVER</div>
+          <div class="plate-body" style="align-items: flex-start;">
+            <div class="popover" style="position: static; max-width: 320px; width: 100%;">
+              <div class="grp-lbl">▰ PUBLISH OPTIONS</div>
+              <div style="padding: 4px 10px 12px;">
+                <div class="field"><label class="lbl">VISIBILITY</label>
+                  <select class="select-native"><option>Public</option><option>Unlisted</option></select>
+                </div>
+                <div class="switch-row" style="margin-top: 12px;"><div class="switch on"></div>Notify subscribers</div>
+                <div class="switch-row" style="margin-top: 10px;"><div class="switch"></div>Cross-post to RSS</div>
+                <div style="display: flex; gap: 8px; margin-top: 18px;">
+                  <button class="btn btn-ghost btn-sm" style="flex: 1;">CANCEL</button>
+                  <button class="btn btn-primary btn-sm" style="flex: 1;">▸ PUBLISH</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="plate">
+          <div class="plate-head"><span class="n">▱</span> TOOLTIPS</div>
+          <div class="plate-body" style="flex-direction: column; gap: 18px;">
+            <span class="tooltip">⌘K · Open the command bar</span>
+            <span class="tooltip">⏎ to publish · ⇧⏎ to schedule</span>
+            <span class="tooltip" style="color: var(--acc);">▰ shipped 2m ago</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 16 · MODALS / DRAWERS ============== -->
+    <section class="s" id="modals">
+      <header class="s-head">
+        <div class="n">16</div>
+        <div>
+          <h2 class="t">MODALS &amp; DRAWERS</h2>
+          <div class="d">Modals lift onto surface-1 with a strong shadow over a darkened backdrop. Drawers slide in from the right at 360px, full-height.</div>
+        </div>
+        <div class="tag">2 PATTERNS</div>
+      </header>
+
+      <div class="row r2">
+        <div class="plate">
+          <div class="plate-head"><span class="n">▰</span> MODAL</div>
+          <div class="modal-demo">
+            <div class="modal-shell">
+              <span class="badge acc-soft" style="margin-bottom: 14px;">▰ CONFIRM</span>
+              <div class="h">Delete &ldquo;notes/2026-05&rdquo;?</div>
+              <div class="sub">This will remove 14 notes and unpin two widgets that reference them. There&rsquo;s no undo from here.</div>
+              <label class="check" onclick="this.classList.toggle('on')"><span class="box"></span>Also delete linked widgets</label>
+              <div class="actions">
+                <button class="btn btn-ghost">CANCEL</button>
+                <button class="btn btn-destructive">DELETE</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="plate">
+          <div class="plate-head"><span class="n">▱</span> DRAWER</div>
+          <div class="modal-demo" style="padding: 0; overflow: hidden;">
+            <div class="drawer-shell" style="width: 100%; height: 100%;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                <span class="mark" style="color: var(--acc); font-size: 11px; letter-spacing: 0.16em;">▰ INSPECTOR</span>
+                <button class="btn btn-icon btn-sm btn-ghost">✕</button>
+              </div>
+              <div class="display" style="font-size: 22px; letter-spacing: -0.02em; margin-bottom: 4px;">Calendar widget</div>
+              <div class="faint uc">▰ WIDGET · v2 · 0007</div>
+              <div class="divider"></div>
+              <div class="v-stack">
+                <div class="field"><label class="lbl">TITLE</label><input class="input" value="This week" /></div>
+                <div class="field"><label class="lbl">SOURCE</label>
+                  <select class="select-native"><option>Google Calendar</option><option>iCloud</option></select>
+                </div>
+                <div class="switch-row"><div class="switch on"></div>Show details on hover</div>
+              </div>
+              <div style="margin-top: auto; display: flex; gap: 8px;">
+                <button class="btn btn-ghost" style="flex: 1;">DISCARD</button>
+                <button class="btn btn-primary" style="flex: 1;">SAVE</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 17 · PROGRESS ============== -->
+    <section class="s" id="progress">
+      <header class="s-head">
+        <div class="n">17</div>
+        <div>
+          <h2 class="t">PROGRESS &amp; LOADERS</h2>
+          <div class="d">Two flavors of progress (bar + block-character), spinner, dot-pulse loader, and shimmer skeletons.</div>
+        </div>
+        <div class="tag">5 PATTERNS</div>
+      </header>
+
+      <div class="row r2">
+        <div class="plate">
+          <div class="plate-head"><span class="n">▰</span> PROGRESS — BAR</div>
+          <div class="plate-body col" style="gap: 16px;">
+            <div class="v-stack" style="gap: 6px;"><div class="faint uc">UPLOAD · 24%</div><div class="progress"><div class="bar" style="width: 24%;"></div></div></div>
+            <div class="v-stack" style="gap: 6px;"><div class="faint uc">BUILD · 68%</div><div class="progress"><div class="bar" style="width: 68%;"></div></div></div>
+            <div class="v-stack" style="gap: 6px;"><div class="faint uc">COMPLETE · 100%</div><div class="progress"><div class="bar" style="width: 100%;"></div></div></div>
+          </div>
+        </div>
+
+        <div class="plate">
+          <div class="plate-head"><span class="n">▱</span> PROGRESS — BLOCKS</div>
+          <div class="plate-body col" style="gap: 16px;">
+            <div><div class="faint uc">READING · 64%</div><div class="progress-blocks" style="margin-top: 6px;">▰▰▰▰▰▰<span class="empty">▱▱▱▱</span></div></div>
+            <div><div class="faint uc">CAPACITY · 88%</div><div class="progress-blocks" style="margin-top: 6px;">▰▰▰▰▰▰▰▰<span class="empty">▱▱</span></div></div>
+            <div><div class="faint uc">FULL</div><div class="progress-blocks" style="margin-top: 6px;">▰▰▰▰▰▰▰▰▰▰</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row r3" style="margin-top: 16px;">
+        <div class="plate">
+          <div class="plate-head"><span class="n">░</span> SPINNER</div>
+          <div class="plate-body center"><span class="spinner"></span></div>
+        </div>
+        <div class="plate">
+          <div class="plate-head"><span class="n">▒</span> DOT PULSE</div>
+          <div class="plate-body center"><span class="dots-loader"><span></span><span></span><span></span></span></div>
+        </div>
+        <div class="plate">
+          <div class="plate-head"><span class="n">▓</span> SKELETON</div>
+          <div class="plate-body col" style="gap: 8px;">
+            <div class="skeleton" style="height: 14px; width: 60%;"></div>
+            <div class="skeleton" style="height: 10px; width: 100%;"></div>
+            <div class="skeleton" style="height: 10px; width: 84%;"></div>
+            <div class="skeleton" style="height: 10px; width: 38%;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 18 · CHARTS ============== -->
+    <section class="s" id="charts">
+      <header class="s-head">
+        <div class="n">18</div>
+        <div>
+          <h2 class="t">CHARTS</h2>
+          <div class="d">Sparkline (inside KPI tiles), bar, line. Single accent for the active series, surface-3 for the rest. No gridlines louder than a hairline.</div>
+        </div>
+        <div class="tag">3 TYPES</div>
+      </header>
+
+      <div class="row r3">
+        <div class="chart">
+          <div class="card-head" style="margin-bottom: 8px;"><span class="mark">▰ SPARK</span><span class="ttl display" style="font-size: 18px;">Visits / 7d</span></div>
+          <svg viewBox="0 0 100 36" preserveAspectRatio="none" style="height: 60px;">
+            <path class="area" d="M0,28 L8,24 L16,26 L24,18 L32,22 L40,14 L48,18 L56,8 L64,12 L72,5 L80,9 L88,3 L96,6 L100,4 L100,36 L0,36 Z"/>
+            <path class="line" d="M0,28 L8,24 L16,26 L24,18 L32,22 L40,14 L48,18 L56,8 L64,12 L72,5 L80,9 L88,3 L96,6 L100,4"/>
+          </svg>
+          <div class="faint uc" style="margin-top: 8px;">MON · TUE · WED · THU · FRI · SAT · SUN</div>
+        </div>
+
+        <div class="chart">
+          <div class="card-head" style="margin-bottom: 8px;"><span class="mark">▱ BAR</span><span class="ttl display" style="font-size: 18px;">Posts / mo</span></div>
+          <svg viewBox="0 0 220 80" style="height: 80px;">
+            <line class="grid" x1="0" y1="60" x2="220" y2="60"/>
+            <line class="grid" x1="0" y1="40" x2="220" y2="40"/>
+            <line class="grid" x1="0" y1="20" x2="220" y2="20"/>
+            <rect class="bar" x="4"   y="38" width="14" height="22"/>
+            <rect class="bar" x="22"  y="30" width="14" height="30"/>
+            <rect class="bar" x="40"  y="42" width="14" height="18"/>
+            <rect class="bar" x="58"  y="22" width="14" height="38"/>
+            <rect class="bar" x="76"  y="34" width="14" height="26"/>
+            <rect class="bar" x="94"  y="18" width="14" height="42"/>
+            <rect class="bar" x="112" y="26" width="14" height="34"/>
+            <rect class="bar" x="130" y="12" width="14" height="48"/>
+            <rect class="bar" x="148" y="22" width="14" height="38"/>
+            <rect class="bar" x="166" y="8"  width="14" height="52"/>
+            <rect class="bar acc" x="184" y="4"  width="14" height="56"/>
+            <rect class="bar" x="202" y="20" width="14" height="40"/>
+          </svg>
+          <div class="faint uc" style="margin-top: 8px;">J F M A M J J A S O <span style="color: var(--acc);">N</span> D</div>
+        </div>
+
+        <div class="chart">
+          <div class="card-head" style="margin-bottom: 8px;"><span class="mark">░ LINE</span><span class="ttl display" style="font-size: 18px;">Read time</span></div>
+          <svg viewBox="0 0 220 80" style="height: 80px;">
+            <line class="grid" x1="0" y1="60" x2="220" y2="60"/>
+            <line class="grid" x1="0" y1="40" x2="220" y2="40"/>
+            <line class="grid" x1="0" y1="20" x2="220" y2="20"/>
+            <path class="area" d="M0,50 L30,46 L60,52 L90,32 L120,38 L150,22 L180,28 L220,12 L220,80 L0,80 Z"/>
+            <path class="line" d="M0,50 L30,46 L60,52 L90,32 L120,38 L150,22 L180,28 L220,12"/>
+            <circle class="dot" cx="180" cy="28" r="3"/>
+            <circle class="dot" cx="220" cy="12" r="3"/>
+          </svg>
+          <div class="faint uc" style="margin-top: 8px;">JAN · APR · JUL · OCT</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 19 · KPI ============== -->
+    <section class="s" id="kpi">
+      <header class="s-head">
+        <div class="n">19</div>
+        <div>
+          <h2 class="t">KPI / STAT TILES</h2>
+          <div class="d">Display-weight value, micro-label, delta in accent or danger, sparkline below. Top-left accent tab marks it as a stat surface.</div>
+        </div>
+        <div class="tag">1 PATTERN</div>
+      </header>
+
+      <div class="row r4">
+        <div class="kpi">
+          <div class="lbl">VISITORS / 7D</div>
+          <div class="val tnum">12,840</div>
+          <div class="spark"><svg viewBox="0 0 100 32" preserveAspectRatio="none"><path class="area" d="M0,24 L10,20 L20,22 L30,16 L40,18 L50,11 L60,14 L70,8 L80,10 L90,5 L100,7 L100,32 L0,32 Z"/><path class="line" d="M0,24 L10,20 L20,22 L30,16 L40,18 L50,11 L60,14 L70,8 L80,10 L90,5 L100,7"/></svg></div>
+          <div class="meta"><span>VS PRIOR</span><span class="delta">18.4%</span></div>
+        </div>
+        <div class="kpi">
+          <div class="lbl">POSTS / YTD</div>
+          <div class="val tnum">047</div>
+          <div class="spark"><svg viewBox="0 0 100 32" preserveAspectRatio="none"><path class="line" d="M0,18 L20,20 L40,15 L60,22 L80,12 L100,15"/></svg></div>
+          <div class="meta"><span>+12 ON YEAR</span><span class="delta">34%</span></div>
+        </div>
+        <div class="kpi">
+          <div class="lbl">AVG READ</div>
+          <div class="val tnum">4:18<span class="unit">m</span></div>
+          <div class="spark"><svg viewBox="0 0 100 32" preserveAspectRatio="none"><path class="line" d="M0,22 L15,16 L30,18 L45,10 L60,14 L75,8 L90,12 L100,5"/></svg></div>
+          <div class="meta"><span>P50</span><span class="delta">8%</span></div>
+        </div>
+        <div class="kpi">
+          <div class="lbl">P95 LATENCY</div>
+          <div class="val tnum">142<span class="unit">ms</span></div>
+          <div class="spark"><svg viewBox="0 0 100 32" preserveAspectRatio="none"><path class="line" d="M0,14 L20,18 L40,12 L60,22 L80,16 L100,20"/></svg></div>
+          <div class="meta"><span>30D</span><span class="delta down">3%</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 20 · EMPTY ============== -->
+    <section class="s" id="empty">
+      <header class="s-head">
+        <div class="n">20</div>
+        <div>
+          <h2 class="t">EMPTY STATES</h2>
+          <div class="d">Block-character glyph centered above a short heading + one-line subhead + one primary action. No illustrations — restraint is the point.</div>
+        </div>
+        <div class="tag">3 EXAMPLES</div>
+      </header>
+
+      <div class="row r3">
+        <div class="empty">
+          <div class="glyph"><span class="acc">▰</span>▱▱▱</div>
+          <div class="h">No posts yet.</div>
+          <p class="sub">Drop a draft to start. The first entry sets the tone.</p>
+          <button class="btn btn-primary btn-sm">▸ NEW POST</button>
+        </div>
+        <div class="empty">
+          <div class="glyph">░ ▒ <span class="acc">▓</span> █</div>
+          <div class="h">Widget shelf is empty.</div>
+          <p class="sub">Add a calendar, now-playing strip, or build status to make the dashboard yours.</p>
+          <button class="btn btn-secondary btn-sm">+ ADD WIDGET</button>
+        </div>
+        <div class="empty">
+          <div class="glyph"><span class="acc">▮</span> ━ ━ ━</div>
+          <div class="h">No results.</div>
+          <p class="sub">Nothing matched your filter. Try widening the date range or removing a tag.</p>
+          <button class="btn btn-ghost btn-sm">CLEAR FILTERS</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 21 · FORMS ============== -->
+    <section class="s" id="forms">
+      <header class="s-head">
+        <div class="n">21</div>
+        <div>
+          <h2 class="t">FORMS</h2>
+          <div class="d">A two-column form grid. Labels and section copy sit left, fields sit right. Settings-page friendly. Inline groups (row-2 / row-3) for related fields.</div>
+        </div>
+        <div class="tag">FULL LAYOUT</div>
+      </header>
+
+      <div class="card" style="padding: 32px;">
+        <div class="form-grid">
+          <div class="sect-lbl">
+            <span class="num">SECTION · 01</span>
+            Identity
+            <span class="sub">How you appear on the front of the room — display name, handle, and the line under your byline.</span>
+          </div>
+          <div class="sect-body">
+            <div class="row-2">
+              <div class="field"><label class="lbl">DISPLAY NAME <span class="req">*</span></label><input class="input" value="Hendrik" /></div>
+              <div class="field"><label class="lbl">HANDLE</label>
+                <div class="input-wrap"><span class="icon-l">@</span><input class="input" value="hendrik" /></div>
+              </div>
+            </div>
+            <div class="field">
+              <label class="lbl">BIO</label>
+              <textarea class="textarea">Building basecamp — a quiet room for notes, widgets, and the work.</textarea>
+              <span class="hint">Shows under your byline. 140 chars max.</span>
+            </div>
+          </div>
+
+          <div style="grid-column: 1 / -1; height: 1px; background: var(--rule);"></div>
+
+          <div class="sect-lbl">
+            <span class="num">SECTION · 02</span>
+            Appearance
+            <span class="sub">Theme, density, motion. Saved per device.</span>
+          </div>
+          <div class="sect-body">
+            <div class="row-3">
+              <div class="field"><label class="lbl">THEME</label>
+                <select class="select-native"><option>Dark</option><option>Light</option><option>System</option></select>
+              </div>
+              <div class="field"><label class="lbl">DENSITY</label>
+                <select class="select-native"><option>Comfortable</option><option>Compact</option></select>
+              </div>
+              <div class="field"><label class="lbl">RADIUS</label>
+                <select class="select-native"><option>Tiny (2px)</option><option>Square (0px)</option></select>
+              </div>
+            </div>
+            <div class="switch-row"><div class="switch on"></div>Show grain texture</div>
+            <div class="switch-row"><div class="switch"></div>Reduce motion</div>
+          </div>
+
+          <div style="grid-column: 1 / -1; height: 1px; background: var(--rule);"></div>
+
+          <div class="sect-lbl">
+            <span class="num">SECTION · 03</span>
+            Danger zone
+            <span class="sub">Irreversible. We&rsquo;ll ask twice.</span>
+          </div>
+          <div class="sect-body">
+            <div class="alert danger" style="margin: 0;">
+              <span class="ico">✕</span>
+              <div class="body">
+                <div class="ttl">Delete the room.</div>
+                <p class="msg">Removes every post, note, widget, and saved draft. There is no undo.</p>
+              </div>
+              <button class="btn btn-destructive">DELETE</button>
+            </div>
+          </div>
+        </div>
+        <div class="card-foot" style="margin-top: 32px;">
+          <span class="faint uc">▰ AUTOSAVED · 12s ago</span>
+          <div class="h-stack">
+            <button class="btn btn-ghost">DISCARD</button>
+            <button class="btn btn-primary">▸ SAVE CHANGES</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 22 · NAV / SIDEBAR ============== -->
+    <section class="s" id="nav">
+      <header class="s-head">
+        <div class="n">22</div>
+        <div>
+          <h2 class="t">NAVIGATION</h2>
+          <div class="d">Top nav uses backdrop-blur. Sidebar lives on surface-0 with grouped items, micro-labels, and a block marker on the active row. Breadcrumbs are slash-separated, dim → text.</div>
+        </div>
+        <div class="tag">3 PIECES</div>
+      </header>
+
+      <div class="plate">
+        <div class="plate-head"><span class="n">▰</span> BREADCRUMBS</div>
+        <div class="plate-body">
+          <div class="crumbs">
+            <a href="#">Room</a>
+            <span class="sep">/</span>
+            <a href="#">Posts</a>
+            <span class="sep">/</span>
+            <a href="#">Essays</a>
+            <span class="sep">/</span>
+            <span class="here">The discipline of things</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="row r2" style="margin-top: 16px;">
+        <div class="plate">
+          <div class="plate-head"><span class="n">▱</span> SIDEBAR · APP</div>
+          <div class="plate-body" style="padding: 0;">
+            <div class="sidebar" style="width: 100%; padding: 20px 12px 24px;">
+              <div class="group">
+                <div class="group-lbl">▰▰ ROOM</div>
+                <a class="item active"><span class="ico">▸</span>Dashboard</a>
+                <a class="item"><span class="ico">◇</span>Posts<span class="badge" style="margin-left: auto;">47</span></a>
+                <a class="item"><span class="ico">◆</span>Notes<span class="badge" style="margin-left: auto;">214</span></a>
+                <a class="item"><span class="ico">▣</span>Widgets</a>
+              </div>
+              <div class="group">
+                <div class="group-lbl">░▒ LIBRARY</div>
+                <a class="item"><span class="ico">#</span>Tags</a>
+                <a class="item"><span class="ico">↗</span>Drafts</a>
+                <a class="item"><span class="ico">★</span>Pinned</a>
+              </div>
+              <div class="group">
+                <div class="group-lbl">▓█ ROOM</div>
+                <a class="item"><span class="ico">⚙</span>Settings</a>
+                <a class="item"><span class="ico">i</span>Help</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="plate">
+          <div class="plate-head"><span class="n">░</span> TOP NAV — VARIANTS</div>
+          <div class="plate-body col" style="padding: 0; gap: 0;">
+            <div class="topnav" style="position: static;">
+              <div class="topnav-inner" style="padding: 12px 20px;">
+                <a class="brand" href="#"><span class="block"></span>basecamp <small>v0.1</small></a>
+                <span class="nav-meta">/ Dashboard</span>
+                <span class="nav-links">
+                  <a class="active">DASH</a>
+                  <a>POSTS</a>
+                  <a>NOTES</a>
+                </span>
+                <span class="user-pill"><span class="avatar sm">HV</span>HV<span class="faint">▰</span></span>
+              </div>
+            </div>
+            <div style="padding: 16px 20px; background: var(--surface-2); color: var(--muted); font-size: 11px;">
+              <span class="faint uc">// Marketing variant — used on the public landing.</span>
+            </div>
+            <div class="topnav" style="position: static;">
+              <div class="topnav-inner" style="padding: 12px 20px;">
+                <a class="brand" href="#"><span class="block"></span>basecamp</a>
+                <span class="nav-links" style="margin-left: 0;">
+                  <a>WORK</a>
+                  <a>WRITING</a>
+                  <a>ABOUT</a>
+                </span>
+                <button class="btn btn-primary btn-sm" style="margin-left: auto;">▸ SIGN IN</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== 23 · LAYOUTS ============== -->
+    <section class="s" id="layouts">
+      <header class="s-head">
+        <div class="n">23</div>
+        <div>
+          <h2 class="t">LAYOUTS — IN MOTION</h2>
+          <div class="d">Every primitive above, composed into the three pages that matter most. Click through to see the full mock.</div>
+        </div>
+        <div class="tag">3 SCREENS</div>
+      </header>
+
+      <div class="layout-links">
+        <a href="Marketing Landing.html">
+          <div class="arr">→</div>
+          <div class="n">01</div>
+          <div class="t">MARKETING LANDING</div>
+          <div class="d">The front door. Hero, work index, writing index, footer.</div>
+        </a>
+        <a href="App Shell.html">
+          <div class="arr">→</div>
+          <div class="n">02</div>
+          <div class="t">APP SHELL</div>
+          <div class="d">Sidebar + content. The notes / posts editor view.</div>
+        </a>
+        <a href="Dashboard.html">
+          <div class="arr">→</div>
+          <div class="n">03</div>
+          <div class="t">DASHBOARD</div>
+          <div class="d">KPI tiles, activity table, widget shelf.</div>
+        </a>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <footer style="display: flex; justify-content: space-between; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); padding: 20px 0 0;">
+      <span>BASECAMP · DESIGN · v0.1 · DIRECTION C</span>
+      <span><span class="acc">▰</span> READY TO BUILD</span>
+    </footer>
+  </main>
+</div>
+
+<script>
+  // Theme toggle
+  function toggleTheme() {
+    const html = document.documentElement;
+    const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    html.dataset.theme = next;
+    const lbl = document.getElementById('theme-label');
+    if (lbl) lbl.textContent = next.toUpperCase();
+    updateSwatchHex(next);
+    try { localStorage.setItem('basecamp-theme', next); } catch (e) {}
+  }
+  function updateSwatchHex(mode) {
+    document.querySelectorAll('[data-hex-dark][data-hex-light]').forEach(el => {
+      el.textContent = el.getAttribute(mode === 'dark' ? 'data-hex-dark' : 'data-hex-light');
+    });
+  }
+  // Restore theme
+  (function() {
+    try {
+      const saved = localStorage.getItem('basecamp-theme');
+      if (saved) {
+        document.documentElement.dataset.theme = saved;
+        const lbl = document.getElementById('theme-label');
+        if (lbl) lbl.textContent = saved.toUpperCase();
+        updateSwatchHex(saved);
+      }
+    } catch (e) {}
+  })();
+
+  // Radio picker — single-select among siblings in a group
+  function radioPick(el, group) {
+    const parent = el.parentElement;
+    parent.querySelectorAll('.radio').forEach(r => r.classList.remove('on'));
+    el.classList.add('on');
+  }
+
+  // Toggle-group buttons
+  function tg(e) {
+    if (e.target.tagName !== 'BUTTON') return;
+    e.currentTarget.querySelectorAll('button').forEach(b => b.classList.remove('on'));
+    e.target.classList.add('on');
+  }
+
+  // Tabs
+  function tabs(e) {
+    if (e.target.tagName !== 'BUTTON') return;
+    e.currentTarget.querySelectorAll('button').forEach(b => b.classList.remove('on'));
+    e.target.classList.add('on');
+  }
+
+  // Side TOC: highlight section on scroll
+  (function() {
+    const links = document.querySelectorAll('.ds-toc a');
+    const map = new Map();
+    links.forEach(a => {
+      const id = a.getAttribute('href').slice(1);
+      const sec = document.getElementById(id);
+      if (sec) map.set(sec, a);
+    });
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(en => {
+        if (en.isIntersecting) {
+          links.forEach(l => l.classList.remove('active'));
+          const link = map.get(en.target);
+          if (link) link.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-80px 0px -60% 0px', threshold: 0 });
+    map.forEach((_, sec) => obs.observe(sec));
+  })();
+</script>
+</body>
+</html>

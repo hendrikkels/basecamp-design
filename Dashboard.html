@@ -1,0 +1,813 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>basecamp — dashboard</title>
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="components.css" />
+<style>
+  html, body { height: 100%; overflow: hidden; }
+  body { display: flex; flex-direction: column; }
+
+  /* TOP STRIP */
+  .app-top {
+    background: var(--bg);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    border-bottom: 1px solid var(--hairline);
+    flex: 0 0 auto;
+    z-index: var(--z-nav);
+  }
+  .app-top-inner {
+    display: grid;
+    grid-template-columns: 220px 1fr auto;
+    align-items: center;
+    height: 48px;
+  }
+  .app-brand-cell {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 16px;
+    height: 100%;
+    border-right: 1px solid var(--hairline);
+  }
+  .app-top-center {
+    display: flex; align-items: center; gap: 12px;
+    padding: 0 20px;
+    height: 100%;
+  }
+  .app-top-center .crumbs { font-size: 11px; }
+  .app-top-center .input-wrap { margin-left: auto; max-width: 320px; flex: 1;}
+  .app-top-center .input-wrap .input { height: 28px; background: var(--surface-2); font-size: 12px; padding-left: 30px; }
+  .app-top-center .input-wrap .icon-l { left: 10px; }
+  .app-top-actions {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 16px; height: 100%;
+  }
+
+  /* BODY */
+  .app-body {
+    flex: 1; display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: 0;
+  }
+
+  /* SIDEBAR (same as app shell) */
+  .app-sidebar {
+    background: var(--surface-0);
+    padding: 18px 12px;
+    display: flex; flex-direction: column; gap: 4px;
+    overflow-y: auto; position: relative;
+  }
+  .app-sidebar::after {
+    content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 1px; background: var(--hairline);
+  }
+  .app-sidebar .group { display: flex; flex-direction: column; gap: 2px; margin-top: 18px; }
+  .app-sidebar .group-lbl {
+    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--dim); padding: 4px 10px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .app-sidebar .item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 10px; font-size: 12px;
+    color: var(--muted); border-radius: var(--r-xs);
+    cursor: pointer; text-decoration: none;
+    transition: background var(--dur-fast), color var(--dur-fast);
+  }
+  .app-sidebar .item:hover { background: var(--surface-1); color: var(--text); }
+  .app-sidebar .item.active { background: var(--surface-2); color: var(--text); }
+  .app-sidebar .item.active::before { content: '▰'; color: var(--acc); margin-right: -2px; font-size: 9px;}
+  .app-sidebar .item .count { margin-left: auto; color: var(--dim); font-size: 10px; font-feature-settings: "tnum";}
+  .app-sidebar .item.active .count { color: var(--text); }
+  .app-sidebar .item .ico { width: 14px; text-align: center; color: var(--dim); font-family: var(--mono); font-size: 13px; flex-shrink: 0;}
+  .app-sidebar .item.active .ico { color: var(--text); }
+  .app-sidebar .user-card {
+    margin-top: auto; background: var(--surface-1);
+    padding: 10px 12px; border-radius: var(--r-xs);
+    display: flex; align-items: center; gap: 10px; cursor: pointer;
+  }
+  .app-sidebar .user-card .name { font-size: 12px; color: var(--text); line-height: 1.2;}
+  .app-sidebar .user-card .meta { font-size: 10px; color: var(--dim); letter-spacing: 0.06em; }
+
+  /* MAIN — Dashboard content */
+  .dash {
+    overflow-y: auto;
+    padding: 32px 40px 80px;
+  }
+  .dash-hero {
+    display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: end;
+    padding-bottom: 24px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .dash-hero .meta {
+    color: var(--dim); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 12px;
+  }
+  .dash-hero .meta .acc { color: var(--acc); }
+  .dash-hero h1 {
+    font-family: var(--display); font-size: 56px; letter-spacing: -0.03em;
+    line-height: 0.95; margin: 0;
+  }
+  .dash-hero h1 em { color: var(--muted); font-style: normal; }
+  .dash-hero .actions { display: flex; gap: 8px; align-items: center; }
+  .dash-hero .actions .toggle-group { transform: scale(0.95); }
+
+  /* MAIN GRID */
+  .dash-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 24px;
+  }
+  .dash-grid > .col { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+
+  /* Activity table block */
+  .activity {
+    background: var(--surface-1);
+    border-radius: var(--r-sm);
+    overflow: hidden;
+  }
+  .activity-head {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .activity-head .ttl {
+    font-family: var(--display); font-size: 18px; letter-spacing: -0.01em;
+  }
+  .activity-head .acc { color: var(--acc); margin-right: 6px; }
+  .activity-head .toggle-group { margin-left: auto; }
+
+  /* Featured chart */
+  .chart-feature {
+    background: var(--surface-1);
+    border-radius: var(--r-sm);
+    padding: 20px;
+    position: relative;
+  }
+  .chart-feature::before {
+    content: ''; position: absolute; top: 0; left: 0;
+    width: 32px; height: 3px; background: var(--acc);
+  }
+  .chart-feature .head {
+    display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px;
+  }
+  .chart-feature .ttl { font-family: var(--display); font-size: 22px; letter-spacing: -0.02em; }
+  .chart-feature .sub { color: var(--dim); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .chart-feature .vals { display: flex; gap: 32px; margin-bottom: 16px; }
+  .chart-feature .val { display: flex; flex-direction: column; gap: 4px; }
+  .chart-feature .val .l { font-size: 9px; letter-spacing: 0.16em; color: var(--dim); text-transform: uppercase; }
+  .chart-feature .val .v { font-family: var(--display); font-size: 28px; letter-spacing: -0.02em; line-height: 1; font-feature-settings: "tnum"; }
+  .chart-feature .val .v.acc { color: var(--acc); }
+  .chart-feature .val .d { font-size: 10px; color: var(--acc); }
+
+  .chart-feature svg { width: 100%; height: 200px; display: block; overflow: visible; }
+
+  /* Right rail — widget shelf */
+  .shelf-head {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 12px;
+  }
+  .shelf-head .ttl { color: var(--text); font-family: var(--display); font-size: 14px; letter-spacing: -0.005em; text-transform: none; }
+  .shelf-head .acc { color: var(--acc); }
+  .shelf-head .add { margin-left: auto; color: var(--dim); font-family: var(--mono); cursor: pointer; }
+  .shelf-head .add:hover { color: var(--acc); }
+
+  /* Mini widget */
+  .widget {
+    background: var(--surface-1);
+    border-radius: var(--r-sm);
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .widget.frost {
+    background: color-mix(in oklab, var(--surface-2) 65%, transparent);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+  }
+  .widget .h {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 10px; letter-spacing: 0.14em; color: var(--dim); text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .widget .h .acc { color: var(--acc); }
+  .widget .ttl { font-family: var(--display); font-size: 18px; letter-spacing: -0.01em; line-height: 1.1; margin-bottom: 4px;}
+  .widget .sub { color: var(--muted); font-size: 11px; line-height: 1.55; }
+
+  .widget .play-row {
+    display: flex; gap: 10px; align-items: center;
+    margin-top: 14px; padding: 8px; background: var(--surface-2);
+    border-radius: var(--r-xs);
+  }
+  .widget .play-row .play {
+    width: 24px; height: 24px; background: var(--acc); color: var(--acc-on);
+    border-radius: var(--r-xs); display: grid; place-items: center;
+    font-size: 9px;
+  }
+  .widget .play-row .title { font-size: 11px; color: var(--text); }
+  .widget .play-row .artist { font-size: 10px; color: var(--dim); }
+
+  /* Cal week strip */
+  .cal-week {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+    margin-top: 10px;
+  }
+  .cal-week .day {
+    padding: 8px 4px;
+    background: var(--surface-2);
+    border-radius: var(--r-xs);
+    text-align: center;
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .cal-week .day.today { background: var(--acc); color: var(--acc-on); }
+  .cal-week .day .d { font-family: var(--display); font-size: 16px; line-height: 1; letter-spacing: -0.02em; display: block; margin-bottom: 4px;}
+  .cal-week .day .dot {
+    display: inline-block; width: 4px; height: 4px; border-radius: 50%;
+    background: var(--acc); margin: 2px 1px 0;
+  }
+  .cal-week .day.today .dot { background: var(--acc-on); }
+  .cal-week .day.muted .dot { background: var(--surface-3); }
+
+  /* Habit grid */
+  .habit-row { display: flex; gap: 3px; }
+  .habit-row .cell {
+    width: 12px; height: 12px;
+    background: var(--surface-3);
+    border-radius: 2px;
+  }
+  .habit-row .cell.on { background: var(--acc); }
+  .habit-row .cell.dim { background: color-mix(in oklab, var(--acc) 35%, var(--surface-3)); }
+
+  /* Listening / Reading lists */
+  .stack-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+  .stack-list .row {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 11px;
+  }
+  .stack-list .row .cover {
+    width: 28px; height: 28px;
+    background: var(--surface-2);
+    border-radius: 2px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .stack-list .row .cover.acc { background: var(--acc); }
+  .stack-list .row .cover .mk { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--display); font-size: 9px; color: var(--acc-on); }
+  .stack-list .row .t { color: var(--text); }
+  .stack-list .row .a { color: var(--dim); font-size: 10px; }
+
+  /* Status block */
+  .status-strip {
+    background: var(--surface-1); padding: 14px 20px;
+    border-radius: var(--r-sm);
+    display: flex; gap: 32px; align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .status-strip .ico { font-family: var(--mono); color: var(--acc); letter-spacing: -0.05em; font-size: 14px;}
+  .status-strip .item { display: flex; gap: 8px; align-items: center; font-size: 11px; }
+  .status-strip .item .k { color: var(--dim); letter-spacing: 0.12em; text-transform: uppercase; font-size: 10px;}
+  .status-strip .item .v { color: var(--text); font-feature-settings: "tnum"; }
+  .status-strip .item .v.acc { color: var(--acc); }
+  .status-strip .sep { width: 1px; height: 16px; background: var(--surface-3); }
+
+  /* Sub KPIs row — 4 KPIs */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+
+  @media (max-width: 1200px) {
+    .dash-grid { grid-template-columns: 1fr; }
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 800px) {
+    .app-body { grid-template-columns: 1fr; }
+    .app-sidebar { display: none; }
+    .dash { padding: 24px 20px 80px; }
+    .dash-hero { grid-template-columns: 1fr; }
+    .kpi-row { grid-template-columns: 1fr 1fr; }
+    .app-top-inner { grid-template-columns: 1fr auto; }
+    .app-top-center { display: none; }
+  }
+</style>
+</head>
+<body data-screen-label="Dashboard">
+
+<!-- TOP -->
+<header class="app-top">
+  <div class="app-top-inner">
+    <div class="app-brand-cell">
+      <a class="brand" href="index.html"><span class="block"></span>basecamp <small>v0.1</small></a>
+    </div>
+    <div class="app-top-center">
+      <div class="crumbs">
+        <a href="#">Room</a>
+        <span class="sep">/</span>
+        <span class="here">Dashboard</span>
+      </div>
+      <div class="input-wrap">
+        <span class="icon-l">▸</span>
+        <input class="input" placeholder="grep notes / posts / files…" />
+      </div>
+      <span class="kbd">⌘K</span>
+    </div>
+    <div class="app-top-actions">
+      <button class="btn btn-icon btn-sm btn-ghost" title="Notifications">
+        <span style="position: relative;">◇<span style="position: absolute; top: -4px; right: -6px; width: 6px; height: 6px; border-radius: 50%; background: var(--acc);"></span></span>
+      </button>
+      <button class="theme-toggle" onclick="toggleTheme()">
+        <span class="sq"></span><span id="theme-label">DARK</span>
+      </button>
+      <button class="btn btn-primary btn-sm">+ NEW POST<span class="ks">⌘N</span></button>
+    </div>
+  </div>
+</header>
+
+<div class="app-body">
+
+  <!-- SIDEBAR -->
+  <aside class="app-sidebar" data-screen-label="Sidebar">
+    <div class="group" style="margin-top: 0;">
+      <div class="group-lbl">▰▰ ROOM</div>
+      <a class="item active"><span class="ico">▸</span>Dashboard</a>
+      <a class="item" href="App Shell.html"><span class="ico">◇</span>Posts<span class="count">47</span></a>
+      <a class="item"><span class="ico">◆</span>Notes<span class="count">214</span></a>
+      <a class="item"><span class="ico">▣</span>Widgets<span class="count">9</span></a>
+      <a class="item"><span class="ico">★</span>Pinned<span class="count">4</span></a>
+    </div>
+    <div class="group">
+      <div class="group-lbl">░▒ LIBRARY</div>
+      <a class="item"><span class="ico">#</span>Tags</a>
+      <a class="item"><span class="ico">↗</span>Drafts<span class="count">3</span></a>
+      <a class="item"><span class="ico">⏱</span>Scheduled<span class="count">1</span></a>
+      <a class="item"><span class="ico">🗑</span>Trash</a>
+    </div>
+    <div class="group">
+      <div class="group-lbl">▓█ ROOM</div>
+      <a class="item"><span class="ico">⚙</span>Settings</a>
+      <a class="item" href="Design System.html"><span class="ico">▰</span>Design system</a>
+      <a class="item" href="Marketing Landing.html"><span class="ico">↗</span>Public site</a>
+    </div>
+    <div class="user-card">
+      <span class="avatar">HV</span>
+      <div>
+        <div class="name">Hendrik</div>
+        <div class="meta">▰ ONLINE · NY</div>
+      </div>
+      <span style="margin-left: auto; color: var(--dim);">▾</span>
+    </div>
+  </aside>
+
+  <!-- MAIN DASH -->
+  <main class="dash" data-screen-label="Main">
+
+    <!-- HERO -->
+    <div class="dash-hero">
+      <div>
+        <div class="meta">
+          <span class="acc">▰▰▰▱</span>
+          <span>SUNDAY · MAY 24, 2026 · 04:18 PM · NEW YORK</span>
+        </div>
+        <h1>Good evening, <em>Hendrik.</em></h1>
+      </div>
+      <div class="actions">
+        <div class="toggle-group" onclick="tg(event)">
+          <button>DAY</button>
+          <button class="on">WEEK</button>
+          <button>MONTH</button>
+          <button>YEAR</button>
+        </div>
+        <button class="btn btn-sm btn-secondary">↗ EXPORT</button>
+      </div>
+    </div>
+
+    <!-- Status strip -->
+    <div class="status-strip">
+      <span class="ico">▰▰▰▱</span>
+      <div class="item"><span class="k">ONLINE</span><span class="v" style="color: var(--success);">YES</span></div>
+      <div class="sep"></div>
+      <div class="item"><span class="k">UPTIME</span><span class="v">99.94%</span></div>
+      <div class="sep"></div>
+      <div class="item"><span class="k">P95</span><span class="v">142ms</span></div>
+      <div class="sep"></div>
+      <div class="item"><span class="k">LAST DEPLOY</span><span class="v">a72f01 · T-04:18</span></div>
+      <div class="sep"></div>
+      <div class="item"><span class="k">REGION</span><span class="v">SFO · EWR</span></div>
+      <span style="margin-left: auto;"><a href="#" style="color: var(--acc); font-size: 11px; letter-spacing: 0.08em; text-decoration: none;">VIEW LOGS →</a></span>
+    </div>
+
+    <!-- KPI row -->
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="lbl">VISITORS · 7D</div>
+        <div class="val tnum">12,840</div>
+        <div class="spark"><svg viewBox="0 0 100 32" preserveAspectRatio="none"><path class="area" d="M0,24 L10,20 L20,22 L30,16 L40,18 L50,11 L60,14 L70,8 L80,10 L90,5 L100,7 L100,32 L0,32 Z"/><path class="line" d="M0,24 L10,20 L20,22 L30,16 L40,18 L50,11 L60,14 L70,8 L80,10 L90,5 L100,7"/></svg></div>
+        <div class="meta"><span>VS PRIOR</span><span class="delta">18.4%</span></div>
+      </div>
+      <div class="kpi">
+        <div class="lbl">POSTS · YTD</div>
+        <div class="val tnum">047</div>
+        <div class="spark"><svg viewBox="0 0 100 32" preserveAspectRatio="none"><path class="line" d="M0,22 L20,24 L40,18 L60,22 L80,12 L100,15"/></svg></div>
+        <div class="meta"><span>+12 ON YEAR</span><span class="delta">34%</span></div>
+      </div>
+      <div class="kpi">
+        <div class="lbl">AVG READ</div>
+        <div class="val tnum">4:18<span class="unit">m</span></div>
+        <div class="spark"><svg viewBox="0 0 100 32" preserveAspectRatio="none"><path class="line" d="M0,22 L15,16 L30,18 L45,10 L60,14 L75,8 L90,12 L100,5"/></svg></div>
+        <div class="meta"><span>P50</span><span class="delta">8%</span></div>
+      </div>
+      <div class="kpi">
+        <div class="lbl">SUBSCRIBERS</div>
+        <div class="val tnum">1,284</div>
+        <div class="spark"><svg viewBox="0 0 100 32" preserveAspectRatio="none"><path class="line" d="M0,24 L20,20 L40,22 L60,14 L80,10 L100,4"/></svg></div>
+        <div class="meta"><span>30D</span><span class="delta">12%</span></div>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="dash-grid">
+
+      <!-- LEFT COLUMN -->
+      <div class="col">
+
+        <!-- Featured chart -->
+        <div class="chart-feature">
+          <div class="head">
+            <span class="ttl">Visits · last 30 days</span>
+            <span class="sub">▰ 7D AVG · 1,834</span>
+            <span class="toggle-group" style="margin-left: auto;" onclick="tg(event)">
+              <button>1D</button>
+              <button class="on">7D</button>
+              <button>30D</button>
+              <button>90D</button>
+            </span>
+          </div>
+          <div class="vals">
+            <div class="val"><span class="l">TOTAL</span><span class="v tnum acc">12,840</span><span class="d">+18.4% vs prior</span></div>
+            <div class="val"><span class="l">UNIQUE</span><span class="v tnum">8,412</span><span class="d">+12.1%</span></div>
+            <div class="val"><span class="l">RETURNING</span><span class="v tnum">4,428</span><span class="d">+22.9%</span></div>
+          </div>
+
+          <svg viewBox="0 0 600 200" preserveAspectRatio="none">
+            <line class="grid" x1="0" y1="160" x2="600" y2="160" stroke="var(--hairline)"/>
+            <line class="grid" x1="0" y1="120" x2="600" y2="120" stroke="var(--hairline)"/>
+            <line class="grid" x1="0" y1="80" x2="600" y2="80" stroke="var(--hairline)"/>
+            <line class="grid" x1="0" y1="40" x2="600" y2="40" stroke="var(--hairline)"/>
+
+            <!-- Area + Line -->
+            <path d="M0,140 L20,130 L40,135 L60,120 L80,118 L100,108 L120,112 L140,96 L160,98 L180,85 L200,90 L220,76 L240,80 L260,68 L280,72 L300,55 L320,62 L340,46 L360,52 L380,38 L400,42 L420,30 L440,34 L460,22 L480,26 L500,15 L520,18 L540,10 L560,14 L580,6 L600,8 L600,200 L0,200 Z"
+                  fill="var(--acc)" opacity="0.10"/>
+            <path d="M0,140 L20,130 L40,135 L60,120 L80,118 L100,108 L120,112 L140,96 L160,98 L180,85 L200,90 L220,76 L240,80 L260,68 L280,72 L300,55 L320,62 L340,46 L360,52 L380,38 L400,42 L420,30 L440,34 L460,22 L480,26 L500,15 L520,18 L540,10 L560,14 L580,6 L600,8"
+                  fill="none" stroke="var(--acc)" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+            <!-- Highlight last 7 -->
+            <path d="M460,22 L480,26 L500,15 L520,18 L540,10 L560,14 L580,6 L600,8"
+                  fill="none" stroke="var(--acc)" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
+            <circle cx="600" cy="8" r="3.5" fill="var(--acc)"/>
+            <circle cx="600" cy="8" r="6" fill="var(--acc)" opacity="0.25"/>
+
+            <!-- x-axis labels -->
+            <text x="0"   y="195" class="axis-lbl" fill="var(--dim)" font-family="JetBrains Mono" font-size="9" letter-spacing="2">APR 24</text>
+            <text x="180" y="195" class="axis-lbl" fill="var(--dim)" font-family="JetBrains Mono" font-size="9" letter-spacing="2">MAY 01</text>
+            <text x="350" y="195" class="axis-lbl" fill="var(--dim)" font-family="JetBrains Mono" font-size="9" letter-spacing="2">MAY 10</text>
+            <text x="510" y="195" class="axis-lbl" fill="var(--acc)" font-family="JetBrains Mono" font-size="9" letter-spacing="2">MAY 20</text>
+          </svg>
+        </div>
+
+        <!-- Recent activity / posts table -->
+        <div class="activity">
+          <header class="activity-head">
+            <span class="ttl"><span class="acc">▰</span>Recent posts</span>
+            <span style="font-size: 10px; letter-spacing: 0.12em; color: var(--dim); text-transform: uppercase;">5 OF 47</span>
+            <div class="toggle-group" onclick="tg(event)">
+              <button class="on">ALL</button>
+              <button>LIVE</button>
+              <button>DRAFT</button>
+            </div>
+          </header>
+          <table class="tbl">
+            <thead><tr>
+              <th style="width: 40px;">#</th>
+              <th>TITLE</th>
+              <th>TAG</th>
+              <th>STATUS</th>
+              <th class="num">VIEWS</th>
+              <th class="num">PUBLISHED</th>
+              <th style="width: 32px;"></th>
+            </tr></thead>
+            <tbody>
+              <tr>
+                <td class="idx">0042</td>
+                <td>The discipline of things</td>
+                <td><span class="pill" style="padding: 2px 8px; font-size: 10px;"><span class="ac">#</span>essay</span></td>
+                <td><span class="badge acc">LIVE</span></td>
+                <td class="num tnum">12,840</td>
+                <td class="num tnum dim">MAY 24</td>
+                <td><button class="btn btn-icon btn-sm btn-ghost">⋯</button></td>
+              </tr>
+              <tr>
+                <td class="idx">0041</td>
+                <td>On block characters</td>
+                <td><span class="pill" style="padding: 2px 8px; font-size: 10px;"><span class="ac">#</span>type</span></td>
+                <td><span class="badge acc">LIVE</span></td>
+                <td class="num tnum">8,421</td>
+                <td class="num tnum dim">MAY 18</td>
+                <td><button class="btn btn-icon btn-sm btn-ghost">⋯</button></td>
+              </tr>
+              <tr class="selected">
+                <td class="idx">0040</td>
+                <td>How I shipped basecamp</td>
+                <td><span class="pill" style="padding: 2px 8px; font-size: 10px;"><span class="ac">#</span>process</span></td>
+                <td><span class="badge acc">LIVE</span></td>
+                <td class="num tnum">6,128</td>
+                <td class="num tnum dim">MAY 11</td>
+                <td><button class="btn btn-icon btn-sm btn-ghost">⋯</button></td>
+              </tr>
+              <tr>
+                <td class="idx">0039</td>
+                <td>A widget is a promise</td>
+                <td><span class="pill" style="padding: 2px 8px; font-size: 10px;"><span class="ac">#</span>essay</span></td>
+                <td><span class="badge warn">SCHEDULED</span></td>
+                <td class="num tnum dim">—</td>
+                <td class="num tnum dim">MAY 28</td>
+                <td><button class="btn btn-icon btn-sm btn-ghost">⋯</button></td>
+              </tr>
+              <tr>
+                <td class="idx">0038</td>
+                <td>Notes on type</td>
+                <td><span class="pill" style="padding: 2px 8px; font-size: 10px;"><span class="ac">#</span>type</span></td>
+                <td><span class="badge">DRAFT</span></td>
+                <td class="num tnum dim">—</td>
+                <td class="num tnum dim">—</td>
+                <td><button class="btn btn-icon btn-sm btn-ghost">⋯</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Sub charts row -->
+        <div class="row r2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="chart">
+            <div class="head card-head" style="display: flex; justify-content: space-between;">
+              <span class="ttl display" style="font-size: 18px;"><span class="acc">▱</span> Posts by month</span>
+              <span class="faint uc">YTD</span>
+            </div>
+            <svg viewBox="0 0 280 100" style="height: 110px;">
+              <line class="grid" x1="0" y1="80" x2="280" y2="80" stroke="var(--hairline)"/>
+              <line class="grid" x1="0" y1="55" x2="280" y2="55" stroke="var(--hairline)"/>
+              <line class="grid" x1="0" y1="30" x2="280" y2="30" stroke="var(--hairline)"/>
+              <rect class="bar" x="6"   y="58" width="16" height="22" fill="var(--surface-3)"/>
+              <rect class="bar" x="28"  y="48" width="16" height="32" fill="var(--surface-3)"/>
+              <rect class="bar" x="50"  y="55" width="16" height="25" fill="var(--surface-3)"/>
+              <rect class="bar" x="72"  y="38" width="16" height="42" fill="var(--surface-3)"/>
+              <rect class="bar acc" x="94" y="22" width="16" height="58" fill="var(--acc)"/>
+              <rect class="bar" x="116" y="60" width="16" height="20" fill="var(--surface-3)"/>
+              <rect class="bar" x="138" y="44" width="16" height="36" fill="var(--surface-3)"/>
+              <rect class="bar" x="160" y="50" width="16" height="30" fill="var(--surface-3)"/>
+              <rect class="bar" x="182" y="40" width="16" height="40" fill="var(--surface-3)"/>
+              <rect class="bar" x="204" y="56" width="16" height="24" fill="var(--surface-3)"/>
+              <rect class="bar" x="226" y="62" width="16" height="18" fill="var(--surface-3)"/>
+              <rect class="bar" x="248" y="50" width="16" height="30" fill="var(--surface-3)"/>
+            </svg>
+            <div style="display: flex; justify-content: space-between; font-size: 9px; letter-spacing: 0.16em; color: var(--dim); margin-top: 8px;">
+              <span>JAN</span><span>FEB</span><span>MAR</span><span>APR</span><span style="color: var(--acc)">MAY</span><span>JUN</span><span>JUL</span><span>AUG</span><span>SEP</span><span>OCT</span><span>NOV</span><span>DEC</span>
+            </div>
+          </div>
+
+          <div class="chart">
+            <div class="head card-head" style="display: flex; justify-content: space-between;">
+              <span class="ttl display" style="font-size: 18px;"><span class="acc">░</span> Top tags</span>
+              <span class="faint uc">90D</span>
+            </div>
+            <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 10px;">
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 10px; letter-spacing: 0.08em; margin-bottom: 4px;">
+                  <span><span style="color: var(--acc);">#</span>essay</span><span class="dim">28 posts</span>
+                </div>
+                <div class="progress"><div class="bar" style="width: 92%;"></div></div>
+              </div>
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 10px; letter-spacing: 0.08em; margin-bottom: 4px;">
+                  <span><span style="color: var(--acc);">#</span>process</span><span class="dim">14</span>
+                </div>
+                <div class="progress"><div class="bar" style="width: 56%;"></div></div>
+              </div>
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 10px; letter-spacing: 0.08em; margin-bottom: 4px;">
+                  <span><span style="color: var(--acc);">#</span>code</span><span class="dim">12</span>
+                </div>
+                <div class="progress"><div class="bar" style="width: 48%;"></div></div>
+              </div>
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 10px; letter-spacing: 0.08em; margin-bottom: 4px;">
+                  <span><span style="color: var(--acc);">#</span>type</span><span class="dim">9</span>
+                </div>
+                <div class="progress"><div class="bar" style="width: 32%;"></div></div>
+              </div>
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 10px; letter-spacing: 0.08em; margin-bottom: 4px;">
+                  <span><span style="color: var(--acc);">#</span>misc</span><span class="dim">7</span>
+                </div>
+                <div class="progress"><div class="bar" style="width: 22%;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT RAIL — Widget shelf -->
+      <div class="col">
+
+        <div>
+          <div class="shelf-head">
+            <span class="acc">▰</span>
+            <span class="ttl">Widget shelf</span>
+            <span style="font-family: var(--mono); letter-spacing: 0.12em; font-size: 10px;">9 ACTIVE</span>
+            <span class="add">+</span>
+          </div>
+
+          <!-- Now playing -->
+          <div class="widget frost" style="margin-bottom: 12px;">
+            <div class="h"><span><span style="color: var(--acc-2);">▰</span> NOW PLAYING</span><span style="color: var(--acc-2);">LIVE</span></div>
+            <div class="ttl">In quiet rotation</div>
+            <div class="sub">Tim Hecker · Konoyo (2018)</div>
+            <div class="play-row">
+              <div class="play">▶</div>
+              <div style="flex: 1;">
+                <div class="title">This Life</div>
+                <div class="artist">2:14 / 5:48</div>
+              </div>
+              <div class="progress-blocks" style="font-size: 10px;">▰▰▱▱▱</div>
+            </div>
+          </div>
+
+          <!-- Calendar -->
+          <div class="widget" style="margin-bottom: 12px;">
+            <div class="h"><span><span class="acc">▱</span> THIS WEEK</span><span>MAY 24 · 30</span></div>
+            <div class="cal-week">
+              <div class="day muted"><span class="d">24</span><span style="font-size: 8px;">SUN</span></div>
+              <div class="day today"><span class="d">25</span><span style="font-size: 8px;">MON</span><div><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+              <div class="day"><span class="d">26</span><span style="font-size: 8px;">TUE</span><div><span class="dot"></span><span class="dot"></span></div></div>
+              <div class="day"><span class="d">27</span><span style="font-size: 8px;">WED</span><div><span class="dot"></span></div></div>
+              <div class="day"><span class="d">28</span><span style="font-size: 8px;">THU</span><div><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+              <div class="day"><span class="d">29</span><span style="font-size: 8px;">FRI</span><div><span class="dot"></span></div></div>
+              <div class="day muted"><span class="d">30</span><span style="font-size: 8px;">SAT</span></div>
+            </div>
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--hairline); font-size: 11px;">
+              <div style="display: flex; gap: 8px; align-items: center; padding: 4px 0;">
+                <span class="acc" style="color: var(--acc); font-size: 9px;">●</span>
+                <span style="color: var(--text);">09:30 · standup</span>
+                <span style="margin-left: auto; color: var(--dim); font-size: 10px;">MON</span>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center; padding: 4px 0;">
+                <span style="color: var(--dim); font-size: 9px;">○</span>
+                <span style="color: var(--muted);">14:00 · design review</span>
+                <span style="margin-left: auto; color: var(--dim); font-size: 10px;">TUE</span>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center; padding: 4px 0;">
+                <span style="color: var(--dim); font-size: 9px;">○</span>
+                <span style="color: var(--muted);">18:30 · run</span>
+                <span style="margin-left: auto; color: var(--dim); font-size: 10px;">THU</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Habits / streak -->
+          <div class="widget" style="margin-bottom: 12px;">
+            <div class="h"><span><span class="acc">░</span> HABITS</span><span>14W STREAK</span></div>
+            <div class="ttl">Write daily</div>
+            <div class="sub">14 weeks unbroken · today, ✓</div>
+            <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 4px;">
+              <div class="habit-row">
+                <div class="cell on"></div><div class="cell on"></div><div class="cell dim"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div>
+                <div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell dim"></div><div class="cell on"></div>
+                <div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell dim"></div><div class="cell on"></div><div class="cell on"></div>
+              </div>
+              <div class="habit-row">
+                <div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell dim"></div><div class="cell on"></div><div class="cell on"></div>
+                <div class="cell on"></div><div class="cell on"></div><div class="cell dim"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div>
+                <div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div>
+              </div>
+              <div class="habit-row">
+                <div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell dim"></div><div class="cell on"></div>
+                <div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div>
+                <div class="cell dim"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div><div class="cell on"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Reading -->
+          <div class="widget" style="margin-bottom: 12px;">
+            <div class="h"><span><span class="acc">▒</span> READING</span><span>3 ACTIVE</span></div>
+            <div class="ttl">On the desk</div>
+            <div class="sub" style="margin-bottom: 12px;">Three books, slowly.</div>
+            <div class="stack-list">
+              <div class="row">
+                <div class="cover acc"><span class="mk">CA</span></div>
+                <div style="flex: 1;">
+                  <div class="t">A Pattern Language</div>
+                  <div class="a">Christopher Alexander · 64%</div>
+                </div>
+                <div class="progress-blocks" style="font-size: 10px;">▰▰▰▱▱</div>
+              </div>
+              <div class="row">
+                <div class="cover"><span class="mk" style="color: var(--text);">JB</span></div>
+                <div style="flex: 1;">
+                  <div class="t">Ways of Seeing</div>
+                  <div class="a">John Berger · 22%</div>
+                </div>
+                <div class="progress-blocks" style="font-size: 10px;">▰<span class="empty">▱▱▱▱</span></div>
+              </div>
+              <div class="row">
+                <div class="cover"><span class="mk" style="color: var(--text);">SB</span></div>
+                <div style="flex: 1;">
+                  <div class="t">How Buildings Learn</div>
+                  <div class="a">Stewart Brand · 88%</div>
+                </div>
+                <div class="progress-blocks" style="font-size: 10px;">▰▰▰▰<span class="empty">▱</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Build status -->
+          <div class="widget" style="margin-bottom: 12px;">
+            <div class="h"><span><span class="acc">▓</span> BUILD</span><span>v0.3.1</span></div>
+            <div class="ttl">Shipping</div>
+            <div class="sub" style="margin-bottom: 12px;">basecamp · main · a72f01</div>
+            <div class="progress-blocks" style="font-size: 14px;">▰▰▰▰▰▰▰<span class="empty">▱▱▱</span></div>
+            <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 10px; letter-spacing: 0.12em; color: var(--dim);">
+              <span>BUILD</span><span>68% · 2m 14s</span>
+            </div>
+          </div>
+
+          <!-- Quick activity -->
+          <div class="widget">
+            <div class="h"><span><span class="acc">█</span> ACTIVITY</span><span>LAST 24H</span></div>
+            <div style="font-family: var(--mono); font-size: 11px; color: var(--muted); display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
+              <div style="display: flex; gap: 8px;">
+                <span class="dim" style="font-feature-settings:'tnum'; min-width: 38px;">04:18</span>
+                <span style="color: var(--acc);">▸</span>
+                <span style="color: var(--text);">post.published</span>
+                <span class="dim" style="margin-left: auto;">0042</span>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <span class="dim" style="font-feature-settings:'tnum'; min-width: 38px;">12:48</span>
+                <span class="dim">▸</span>
+                <span>deploy.commit</span>
+                <span class="dim" style="margin-left: auto;">a72f01</span>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <span class="dim" style="font-feature-settings:'tnum'; min-width: 38px;">1:14:08</span>
+                <span class="dim">▸</span>
+                <span>note.created</span>
+                <span class="dim" style="margin-left: auto;">+1</span>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <span class="dim" style="font-feature-settings:'tnum'; min-width: 38px;">2:01:33</span>
+                <span class="dim">▸</span>
+                <span>widget.heartbeat</span>
+                <span class="dim" style="margin-left: auto;">OK</span>
+              </div>
+            </div>
+            <a href="#" style="display: block; margin-top: 12px; text-align: center; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--acc); text-decoration: none;">VIEW ALL ACTIVITY →</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  function toggleTheme() {
+    const html = document.documentElement;
+    const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    html.dataset.theme = next;
+    const lbl = document.getElementById('theme-label');
+    if (lbl) lbl.textContent = next.toUpperCase();
+    try { localStorage.setItem('basecamp-theme', next); } catch (e) {}
+  }
+  (function() {
+    try {
+      const saved = localStorage.getItem('basecamp-theme');
+      if (saved) {
+        document.documentElement.dataset.theme = saved;
+        const lbl = document.getElementById('theme-label');
+        if (lbl) lbl.textContent = saved.toUpperCase();
+      }
+    } catch (e) {}
+  })();
+  function tg(e) {
+    if (e.target.tagName !== 'BUTTON') return;
+    e.currentTarget.querySelectorAll('button').forEach(b => b.classList.remove('on'));
+    e.target.classList.add('on');
+  }
+</script>
+</body>
+</html>
